@@ -1,0 +1,39 @@
+# Prompts usados durante el desarrollo
+
+Este archivo sirve como evidencia del uso de IA durante la competencia.
+
+## Analisis del reto
+
+```text
+Analiza las bases y la rubrica de una competencia de programacion con IA. Identifica los criterios de evaluacion, los pesos y una estrategia para maximizar puntaje.
+```
+
+## Alcance MVP
+
+```text
+El reto pide una aplicacion Laravel para registro y monitoreo de generacion solar en Guatemala por departamento. Propone un MVP que cumpla dashboard, mapa, alertas, reportes, proyeccion y API REST.
+```
+
+## Modelo de datos
+
+```text
+Disena un modelo relacional para departamentos, granjas solares, modelos de paneles, paneles por granja, registros de generacion y alertas. Incluye reglas para capacidad instalada, CO2 evitado y desviacion de desempeno.
+```
+
+## Implementacion
+
+```text
+Crea una aplicacion Laravel con migraciones, modelos, seeders, controladores, rutas web/API y vistas Blade para un sistema de monitoreo de granjas solares en Guatemala.
+```
+
+## Verificacion
+
+```text
+Ejecuta migraciones, seeders, rutas y pruebas. Corrige errores hasta que la aplicacion cargue correctamente y los tests pasen.
+```
+
+## Documentacion
+
+```text
+Genera un README breve con objetivo, funcionalidades, tecnologias, instalacion, endpoints API, reglas de calculo y diagrama de base de datos en Mermaid.
+```

@@ -1,0 +1,36 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class EnergyRecord extends Model
+{
+    protected $fillable = [
+        'solar_farm_id',
+        'period',
+        'actual_kwh',
+        'expected_kwh',
+        'co2_avoided_kg',
+        'notes',
+    ];
+
+    protected $casts = [
+        'period' => 'date',
+    ];
+
+    public function solarFarm(): BelongsTo
+    {
+        return $this->belongsTo(SolarFarm::class);
+    }
+
+    public function deviationPercent(): float
+    {
+        if ((float) $this->expected_kwh <= 0) {
+            return 0;
+        }
+
+        return round((1 - ($this->actual_kwh / $this->expected_kwh)) * 100, 2);
+    }
+}
