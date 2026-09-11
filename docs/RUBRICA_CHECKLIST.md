@@ -13,6 +13,7 @@
 - [x] Uso de agente de IA para analisis, diseno, codigo y documentacion.
 - [x] Archivo `PROMPTS.md` con evidencia.
 - [x] Desarrollo incremental con commits.
+- [x] Flujo Git documentado para evidenciar trabajo incremental.
 - [ ] Capturas de pantalla del uso de IA.
 - [ ] Descripcion final del aporte de IA en la presentacion.
 
@@ -45,9 +46,20 @@
 - [x] README tecnico.
 - [x] Diagrama de base de datos en Mermaid.
 - [x] Documentacion minima de API.
-- [x] Roles/flujo Git documentado.
+- [x] Flujo Git y normas de commits documentadas.
 - [x] CHANGELOG.
 - [ ] Manual breve de usuario con capturas.
+
+## Control de versiones
+
+- [x] Ramas `main` y `develop` disponibles.
+- [x] Ramas de trabajo separadas de la rama estable.
+- [x] Regla documentada: ramas personales integran a `develop`, no a `main`.
+- [x] Commits descriptivos.
+- [x] Reglas para actualizar `CHANGELOG.md`.
+- [x] Reglas para registrar prompts y evidencia de IA.
+- [ ] Pull Requests o merges documentados hacia `develop`.
+- [ ] Version estable final en `main`.
 
 ## Presentacion
 
