@@ -6,6 +6,12 @@
 - `develop`: integracion de avances antes de pasar a `main`.
 - ramas de trabajo: cada integrante debe trabajar en una rama propia o de funcionalidad antes de integrar cambios.
 
+## Regla principal
+
+Durante el desarrollo, todos los cambios deben salir desde la rama propia de cada integrante hacia `develop`.
+
+`main` no debe recibir cambios directos ni merges parciales. Solo se actualizara al final, cuando el proyecto este terminado, probado y listo para la entrega o demostracion oficial.
+
 ## Nombres de ramas
 
 Usar nombres cortos, claros y sin espacios.
@@ -27,8 +33,9 @@ docs/manual-usuario
 4. Actualizar `PROMPTS.md` cuando se use IA para analisis, diseno, codigo, pruebas o documentacion.
 5. Probar con `php artisan test` antes de subir cambios.
 6. Subir la rama al remoto.
-7. Integrar a `develop` mediante Pull Request o merge revisado.
-8. Pasar a `main` solo cuando la demo este estable y probada.
+7. Integrar la rama de trabajo a `develop` mediante Pull Request o merge revisado.
+8. Mantener `main` sin cambios durante el desarrollo.
+9. Pasar `develop` a `main` solo cuando el proyecto este terminado, estable y probado para entrega.
 
 ## Comandos recomendados
 
@@ -96,6 +103,8 @@ Cada bloque importante debe dejar:
 - No subir codigo que no ejecute localmente.
 - No mezclar cambios no relacionados en un mismo commit.
 - No modificar `main` directamente durante el desarrollo.
+- No integrar ramas personales directamente a `main`.
+- Integrar avances solamente hacia `develop` hasta que el proyecto este terminado.
 - No borrar historial remoto sin acuerdo del equipo.
 - Revisar `git status` antes de cada commit y antes de cada push.
 - Mantener mensajes de commit en espanol, claros y en modo descriptivo.

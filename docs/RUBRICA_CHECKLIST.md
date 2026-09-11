@@ -54,6 +54,7 @@
 
 - [x] Ramas `main` y `develop` disponibles.
 - [x] Ramas de trabajo separadas de la rama estable.
+- [x] Regla documentada: ramas personales integran a `develop`, no a `main`.
 - [x] Commits descriptivos.
 - [x] Reglas para actualizar `CHANGELOG.md`.
 - [x] Reglas para registrar prompts y evidencia de IA.
