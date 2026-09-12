@@ -9,6 +9,7 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 - Actualizado el flujo Git para describir normas generales de ramas, commits, push e integracion sin mencionar usuarios especificos.
 - Actualizado el checklist de rubrica con control de versiones y evidencia de trabajo incremental.
 - Reforzada la regla de integracion: las ramas personales solo se integran a `develop`; `main` se reserva para la version final terminada y probada.
+- Agregada la norma de crear un documento `.md` por cada cambio solicitado, explicando objetivo, alcance, archivos tocados y pruebas.
 
 ### Agregado
 

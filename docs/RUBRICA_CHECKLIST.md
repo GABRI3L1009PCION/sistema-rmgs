@@ -48,6 +48,7 @@
 - [x] Documentacion minima de API.
 - [x] Flujo Git y normas de commits documentadas.
 - [x] CHANGELOG.
+- [x] Regla documentada para crear un `.md` por cada cambio solicitado.
 - [ ] Manual breve de usuario con capturas.
 
 ## Control de versiones
@@ -58,6 +59,7 @@
 - [x] Commits descriptivos.
 - [x] Reglas para actualizar `CHANGELOG.md`.
 - [x] Reglas para registrar prompts y evidencia de IA.
+- [x] Regla para documentar cada cambio en `docs/cambios/`.
 - [ ] Pull Requests o merges documentados hacia `develop`.
 - [ ] Version estable final en `main`.
 
