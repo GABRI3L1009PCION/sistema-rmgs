@@ -6,6 +6,8 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 
 ### Cambiado
 
+- Vista dashboard ajustada para funcionar como resumen informativo sin acciones de creacion, con hero a ancho completo y KPIs separados.
+- Barra global de busqueda, periodo y acciones retirada del layout principal porque cada modulo cuenta con filtros propios.
 - Menu lateral actualizado para poder ocultarse y mostrarse, conservando la preferencia en el navegador.
 - Dashboard compactado para verse completo en escritorio sin desplazamiento vertical, con resumen ejecutivo de granjas y alertas.
 - Limpieza visual de pantallas principales para diferenciar mejor dashboard, generacion, reportes, mapa, alertas, paneles y configuracion.

@@ -56,22 +56,17 @@
         }
         .brand { display: block; margin: 4px 8px 18px; height: 82px; }
         .brand img { display: block; width: 100%; height: 82px; object-fit: contain; object-position: center; }
-        .sidebar-head { position: relative; }
         .sidebar-toggle {
-            position: absolute;
-            top: 30px;
-            right: -19px;
             width: 42px;
             height: 42px;
             display: grid;
             place-items: center;
-            border: 2px solid #d7e7f7;
-            border-radius: 999px;
-            background: #ffffff;
-            color: var(--blue);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .92);
+            color: #4d6591;
             cursor: pointer;
-            box-shadow: 0 10px 24px rgba(23, 58, 111, .18);
-            z-index: 20;
+            box-shadow: 0 10px 24px rgba(23, 58, 111, .08);
         }
         .sidebar-toggle:hover { color: var(--green-dark); border-color: #9bd7b3; background: #f7fffb; }
         .sidebar-toggle svg { width: 23px; height: 23px; stroke-width: 2.8; }
@@ -93,7 +88,8 @@
         .app-shell.sidebar-collapsed .sidebar { padding-inline: 10px; }
         .app-shell.sidebar-collapsed .brand { width: 48px; height: 54px; margin: 8px auto 18px; overflow: hidden; }
         .app-shell.sidebar-collapsed .brand img { width: 130px; max-width: none; height: 54px; object-fit: contain; object-position: left center; }
-        .app-shell.sidebar-collapsed .sidebar-toggle { right: -21px; transform: rotate(180deg); }
+        .app-shell.sidebar-collapsed .sidebar-toggle i,
+        .app-shell.sidebar-collapsed .sidebar-toggle svg { transform: rotate(180deg); }
         .app-shell.sidebar-collapsed .side-link {
             grid-template-columns: 1fr;
             justify-items: center;
@@ -115,8 +111,32 @@
             border: 1px solid rgba(220, 232, 246, .72);
         }
         .footer-card strong { display: block; margin-top: 8px; color: var(--ink); line-height: 1.2; }
-        .main { min-width: 0; padding: 10px 18px 16px; overflow-x: hidden; }
-        .topbar { display: grid; grid-template-columns: minmax(260px, 1fr) max-content max-content; align-items: center; gap: 12px; margin: 0 0 10px; }
+        .main { min-width: 0; padding: 0 18px 16px; overflow-x: hidden; }
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 12;
+            min-height: 66px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin: 0 -18px;
+            padding: 10px 20px;
+            background: #ffffff;
+            border-bottom: 2px solid #d8e8f7;
+            box-shadow: 0 10px 24px rgba(23, 58, 111, .10);
+            backdrop-filter: blur(12px);
+        }
+        .topbar::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--green), var(--blue));
+        }
         .search-box, .month-picker, .user-menu {
             min-height: 42px;
             border: 1px solid var(--line);
@@ -169,13 +189,11 @@
         th, td { padding: 9px 10px; border-bottom: 1px solid #e8eff7; text-align: left; vertical-align: middle; }
         th { color: #6078a5; font-size: .72rem; font-weight: 800; }
         .nav { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-        .topbar .nav { flex-wrap: nowrap; }
         #map { height: 380px; border-radius: 8px; border: 1px solid var(--line); overflow: hidden; }
         @media (max-width: 1450px) {
             .app-shell { grid-template-columns: 228px minmax(0, 1fr); }
             .app-shell.sidebar-collapsed { grid-template-columns: 76px minmax(0, 1fr); }
-            .main { padding: 10px 14px 14px; }
-            .topbar { grid-template-columns: minmax(220px, 1fr) max-content max-content; gap: 12px; }
+            .main { padding: 0 14px 14px; }
             .user-menu span:not(.avatar) { display: none; }
             .side-link { min-height: 44px; }
         }
@@ -184,8 +202,6 @@
             .sidebar { position: relative; height: auto; }
             .sidebar-toggle { display: none; }
             .side-footer { display: none; }
-            .topbar { grid-template-columns: 1fr; }
-            .topbar .nav { flex-wrap: wrap; }
             .kpis, .two, .form-grid { grid-template-columns: 1fr; }
         }
     </style>
@@ -193,10 +209,7 @@
 <body>
     <div class="app-shell">
         <aside class="sidebar">
-            <div class="sidebar-head">
-                <button class="sidebar-toggle" type="button" aria-label="Ocultar menu" aria-expanded="true" data-sidebar-toggle>
-                    <i data-lucide="panel-left-close"></i>
-                </button>
+            <div>
                 <a class="brand" href="/" aria-label="RMGS - Inicio">
                     <img src="{{ asset('images/rmgs-logo.png') }}" alt="RMGS - Registro y Monitoreo de Generacion Solar Guatemala">
                 </a>
@@ -222,30 +235,9 @@
 
         <main class="main">
             <header class="topbar">
-                <label class="search-box" aria-label="Buscar">
-                    <i data-lucide="search"></i>
-                    <input type="search" placeholder="Buscar granjas, paneles, departamentos...">
-                </label>
-                <div class="nav">
-                    <span class="month-picker"><i data-lucide="calendar-days"></i>{{ request()->routeIs('projections.*') ? '2026 - 2030' : 'Septiembre 2026' }} <i data-lucide="chevron-down"></i></span>
-                    @if (request()->routeIs('panels.*'))
-                        <a class="btn primary" href="{{ route('panels.create') }}"><i data-lucide="plus"></i>Nuevo panel</a>
-                    @elseif (request()->routeIs('records.create') || request()->routeIs('records.edit'))
-                        <a class="btn primary" href="{{ route('records.index') }}"><i data-lucide="bar-chart-3"></i>Ver resumen</a>
-                    @elseif (request()->routeIs('records.index'))
-                        <a class="btn primary" href="{{ route('records.create') }}"><i data-lucide="plus"></i>Registrar generacion</a>
-                    @elseif (request()->routeIs('reports.*'))
-                        <a class="btn primary" href="#report-preview"><i data-lucide="plus"></i>Generar reporte</a>
-                    @elseif (request()->routeIs('alerts.*'))
-                        <a class="btn primary" href="#recommendations"><i data-lucide="bell"></i>Configurar alertas</a>
-                    @elseif (request()->routeIs('projections.*'))
-                        <a class="btn primary" href="{{ route('projections.csv') }}"><i data-lucide="download"></i>Exportar</a>
-                    @elseif (request()->routeIs('settings.*'))
-                        <button class="btn primary" type="submit" form="settings-form"><i data-lucide="check"></i>Guardar cambios</button>
-                    @else
-                        <a class="btn primary" href="{{ route('farms.create') }}"><i data-lucide="plus"></i>Nueva granja</a>
-                    @endif
-                </div>
+                <button class="sidebar-toggle" type="button" aria-label="Ocultar menu" aria-expanded="true" data-sidebar-toggle>
+                    <i data-lucide="panel-left-close"></i>
+                </button>
                 <div class="user-menu">
                     <span class="avatar"><i data-lucide="user"></i></span>
                     <span>Gabriel Admin</span>
