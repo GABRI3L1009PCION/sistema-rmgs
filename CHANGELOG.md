@@ -6,6 +6,8 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 
 ### Cambiado
 
+- Menu lateral actualizado para poder ocultarse y mostrarse, conservando la preferencia en el navegador.
+- Dashboard compactado para verse completo en escritorio sin desplazamiento vertical, con resumen ejecutivo de granjas y alertas.
 - Limpieza visual de pantallas principales para diferenciar mejor dashboard, generacion, reportes, mapa, alertas, paneles y configuracion.
 - Barra superior conservada con buscador, periodo, usuario y acciones contextuales para futura funcionalidad.
 - Dashboard reorganizado como vista de monitoreo nacional con KPIs reales, grafica, ranking y alertas.
@@ -33,6 +35,7 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 - Pruebas de humo para validar pantallas de detalle de granja y edicion de panel.
 - Documento `docs/cambios/2026-09-11-cierre-crud-paneles-granjas.md` con el detalle del cierre funcional.
 - Documento `docs/cambios/2026-09-11-limpieza-visual-vistas.md` con el detalle del rediseño visual.
+- Documento `docs/cambios/2026-09-11-menu-plegable-dashboard-compacto.md` con el detalle del menu plegable y dashboard compacto.
 - Pantalla para editar granjas solares.
 - Accion para desactivar granjas solares sin borrar su historial.
 - Formulario para crear registros historicos de generacion mensual.

@@ -40,7 +40,8 @@
         a { color: inherit; text-decoration: none; }
         h1, h2, h3, p { margin: 0; }
         button, input, select { font: inherit; }
-        .app-shell { display: grid; grid-template-columns: 244px minmax(0, 1fr); min-height: 100vh; }
+        .app-shell { display: grid; grid-template-columns: 244px minmax(0, 1fr); min-height: 100vh; transition: grid-template-columns .22s ease; }
+        .app-shell.sidebar-collapsed { grid-template-columns: 76px minmax(0, 1fr); }
         .sidebar {
             position: sticky;
             top: 0;
@@ -55,6 +56,23 @@
         }
         .brand { display: block; margin: 4px 8px 18px; height: 82px; }
         .brand img { display: block; width: 100%; height: 82px; object-fit: contain; object-position: center; }
+        .sidebar-head { position: relative; }
+        .sidebar-toggle {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .92);
+            color: #4d6591;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(23, 58, 111, .08);
+            z-index: 2;
+        }
         .side-nav { display: grid; gap: 4px; }
         .side-link {
             display: grid;
@@ -69,6 +87,18 @@
         }
         .side-link.active { background: linear-gradient(90deg, #e5f8ec, #effbf4); color: #057448; }
         .side-link svg { width: 22px; height: 22px; stroke-width: 2.4; }
+        .app-shell.sidebar-collapsed .sidebar { padding-inline: 10px; }
+        .app-shell.sidebar-collapsed .brand { width: 48px; height: 54px; margin: 8px auto 18px; overflow: hidden; }
+        .app-shell.sidebar-collapsed .brand img { width: 130px; max-width: none; height: 54px; object-fit: contain; object-position: left center; }
+        .app-shell.sidebar-collapsed .sidebar-toggle { right: -4px; transform: rotate(180deg); }
+        .app-shell.sidebar-collapsed .side-link {
+            grid-template-columns: 1fr;
+            justify-items: center;
+            padding: 0;
+            gap: 0;
+        }
+        .app-shell.sidebar-collapsed .side-link span { display: none; }
+        .app-shell.sidebar-collapsed .side-footer { margin-inline: 0; }
         .side-footer { margin: 12px 8px 2px; display: grid; align-content: end; color: #55709c; }
         .side-footer form { margin: 0; }
         .logout-button { width: 100%; border: 0; background: #fff1f0; color: #b42318; cursor: pointer; text-align: left; }
@@ -140,14 +170,16 @@
         #map { height: 380px; border-radius: 8px; border: 1px solid var(--line); overflow: hidden; }
         @media (max-width: 1450px) {
             .app-shell { grid-template-columns: 228px minmax(0, 1fr); }
+            .app-shell.sidebar-collapsed { grid-template-columns: 76px minmax(0, 1fr); }
             .main { padding: 10px 14px 14px; }
             .topbar { grid-template-columns: minmax(220px, 1fr) max-content max-content; gap: 12px; }
             .user-menu span:not(.avatar) { display: none; }
             .side-link { min-height: 44px; }
         }
         @media (max-width: 900px) {
-            .app-shell { grid-template-columns: 1fr; }
+            .app-shell, .app-shell.sidebar-collapsed { grid-template-columns: 1fr; }
             .sidebar { position: relative; height: auto; }
+            .sidebar-toggle { display: none; }
             .side-footer { display: none; }
             .topbar { grid-template-columns: 1fr; }
             .topbar .nav { flex-wrap: wrap; }
@@ -158,26 +190,29 @@
 <body>
     <div class="app-shell">
         <aside class="sidebar">
-            <div>
+            <div class="sidebar-head">
+                <button class="sidebar-toggle" type="button" aria-label="Ocultar menu" aria-expanded="true" data-sidebar-toggle>
+                    <i data-lucide="panel-left-close"></i>
+                </button>
                 <a class="brand" href="/" aria-label="RMGS - Inicio">
                     <img src="{{ asset('images/rmgs-logo.png') }}" alt="RMGS - Registro y Monitoreo de Generacion Solar Guatemala">
                 </a>
                 <nav class="side-nav">
-                    <a class="side-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="/"><i data-lucide="home"></i>Dashboard</a>
-                    <a class="side-link {{ request()->routeIs('farms.*') ? 'active' : '' }}" href="{{ route('farms.index') }}"><i data-lucide="landmark"></i>Granjas solares</a>
-                    <a class="side-link {{ request()->routeIs('panels.*') ? 'active' : '' }}" href="{{ route('panels.index') }}"><i data-lucide="grid-2x2"></i>Paneles</a>
-                    <a class="side-link {{ request()->routeIs('records.*') ? 'active' : '' }}" href="{{ route('records.index') }}"><i data-lucide="bar-chart-3"></i>Generacion</a>
-                    <a class="side-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="{{ route('reports.index') }}"><i data-lucide="file-text"></i>Reportes</a>
-                    <a class="side-link {{ request()->routeIs('alerts.*') ? 'active' : '' }}" href="{{ route('alerts.index') }}"><i data-lucide="bell"></i>Alertas</a>
-                    <a class="side-link {{ request()->routeIs('projections.*') ? 'active' : '' }}" href="{{ route('projections.index') }}"><i data-lucide="line-chart"></i>Proyecciones</a>
-                    <a class="side-link {{ request()->routeIs('map.*') ? 'active' : '' }}" href="{{ route('map.index') }}"><i data-lucide="map-pin"></i>Ver mapa</a>
-                    <a class="side-link {{ request()->routeIs('settings.*') ? 'active' : '' }}" href="{{ route('settings.index') }}"><i data-lucide="settings"></i>Configuracion</a>
+                    <a class="side-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="/" title="Dashboard"><i data-lucide="home"></i><span>Dashboard</span></a>
+                    <a class="side-link {{ request()->routeIs('farms.*') ? 'active' : '' }}" href="{{ route('farms.index') }}" title="Granjas solares"><i data-lucide="landmark"></i><span>Granjas solares</span></a>
+                    <a class="side-link {{ request()->routeIs('panels.*') ? 'active' : '' }}" href="{{ route('panels.index') }}" title="Paneles"><i data-lucide="grid-2x2"></i><span>Paneles</span></a>
+                    <a class="side-link {{ request()->routeIs('records.*') ? 'active' : '' }}" href="{{ route('records.index') }}" title="Generacion"><i data-lucide="bar-chart-3"></i><span>Generacion</span></a>
+                    <a class="side-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="{{ route('reports.index') }}" title="Reportes"><i data-lucide="file-text"></i><span>Reportes</span></a>
+                    <a class="side-link {{ request()->routeIs('alerts.*') ? 'active' : '' }}" href="{{ route('alerts.index') }}" title="Alertas"><i data-lucide="bell"></i><span>Alertas</span></a>
+                    <a class="side-link {{ request()->routeIs('projections.*') ? 'active' : '' }}" href="{{ route('projections.index') }}" title="Proyecciones"><i data-lucide="line-chart"></i><span>Proyecciones</span></a>
+                    <a class="side-link {{ request()->routeIs('map.*') ? 'active' : '' }}" href="{{ route('map.index') }}" title="Ver mapa"><i data-lucide="map-pin"></i><span>Ver mapa</span></a>
+                    <a class="side-link {{ request()->routeIs('settings.*') ? 'active' : '' }}" href="{{ route('settings.index') }}" title="Configuracion"><i data-lucide="settings"></i><span>Configuracion</span></a>
                 </nav>
             </div>
             <div class="side-footer">
                 <form method="post" action="{{ route('logout') }}">
                     @csrf
-                    <button class="side-link logout-button" type="submit"><i data-lucide="log-out"></i>Cerrar sesion</button>
+                    <button class="side-link logout-button" type="submit" title="Cerrar sesion"><i data-lucide="log-out"></i><span>Cerrar sesion</span></button>
                 </form>
             </div>
         </aside>
@@ -224,6 +259,25 @@
     </div>
 
     <script>
+        const appShell = document.querySelector('.app-shell');
+        const sidebarToggle = document.querySelector('[data-sidebar-toggle]');
+        const sidebarPreference = localStorage.getItem('rmgs-sidebar-collapsed');
+
+        function setSidebarCollapsed(collapsed) {
+            appShell.classList.toggle('sidebar-collapsed', collapsed);
+            sidebarToggle?.setAttribute('aria-expanded', String(!collapsed));
+            sidebarToggle?.setAttribute('aria-label', collapsed ? 'Mostrar menu' : 'Ocultar menu');
+            localStorage.setItem('rmgs-sidebar-collapsed', collapsed ? '1' : '0');
+        }
+
+        if (sidebarPreference === '1') {
+            setSidebarCollapsed(true);
+        }
+
+        sidebarToggle?.addEventListener('click', () => {
+            setSidebarCollapsed(!appShell.classList.contains('sidebar-collapsed'));
+        });
+
         if (window.lucide) {
             window.lucide.createIcons();
         }
