@@ -55,13 +55,19 @@ class DatabaseSeeder extends Seeder
         }
 
         $panels = collect([
-            ['SolarMax', 'SM-450 Mono', 0.450],
-            ['HelioTech', 'HT-550 Bifacial', 0.550],
-            ['Quetzal Solar', 'QS-410 Poly', 0.410],
+            ['SolarMax', 'SM-450 Mono', 0.450, 'Monocristalino', 20.70, '1909 x 1134 x 30 mm', 22.0, 25],
+            ['HelioTech', 'HT-550 Bifacial', 0.550, 'Monocristalino bifacial', 21.30, '2278 x 1134 x 35 mm', 31.5, 30],
+            ['Quetzal Solar', 'QS-410 Poly', 0.410, 'Policristalino', 19.80, '1722 x 1134 x 30 mm', 21.0, 20],
         ])->map(fn ($panel) => PanelModel::create([
             'brand' => $panel[0],
             'model' => $panel[1],
             'nominal_power_kw' => $panel[2],
+            'technology' => $panel[3],
+            'panel_type' => 'Modulo fotovoltaico',
+            'efficiency_percent' => $panel[4],
+            'dimensions' => $panel[5],
+            'weight_kg' => $panel[6],
+            'warranty_years' => $panel[7],
             'status' => 'active',
         ]));
 

@@ -7,11 +7,20 @@
             'brand' => $panel->brand,
             'model' => $panel->model,
             'power_kw' => (float) $panel->nominal_power_kw,
+            'technology' => $panel->technology,
+            'panel_type' => $panel->panel_type,
+            'efficiency' => $panel->efficiency_percent ? (float) $panel->efficiency_percent : null,
+            'dimensions' => $panel->dimensions,
+            'weight_kg' => $panel->weight_kg ? (float) $panel->weight_kg : null,
+            'warranty_years' => $panel->warranty_years,
             'status' => $panel->status,
             'quantity' => $panel->farmPanels->sum('quantity'),
             'farms' => $panel->farmPanels->map(fn ($item) => [
+                'id' => $item->id,
                 'name' => $item->solarFarm->name,
+                'department' => $item->solarFarm->department->name,
                 'quantity' => $item->quantity,
+                'capacity_kw' => round($item->quantity * $panel->nominal_power_kw, 2),
             ])->values(),
         ]]);
     @endphp
@@ -37,6 +46,9 @@
         .panel-list-title h2, .panel-detail-title h2 { display: flex; align-items: center; gap: 8px; font-size: .95rem; }
         .panel-list-title svg, .panel-detail-title svg { width: 18px; color: var(--blue); }
         .panel-list-title span { font-size: .66rem; color: var(--muted); }
+        .panel-list-meta { display: flex; align-items: center; gap: 8px; }
+        .panel-add { width: 28px; height: 28px; display: inline-grid; place-items: center; border: 1px solid var(--line); border-radius: 6px; color: var(--green-dark); background: var(--mint); }
+        .panel-add svg { width: 15px; }
         .panel-table-wrap { min-height: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 7px; }
         .panel-table { table-layout: fixed; font-size: .67rem; }
         .panel-table th, .panel-table td { height: 37px; padding: 4px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -63,6 +75,8 @@
         .detail-head p { margin-top: 4px; font-size: .68rem; color: var(--muted); }
         .detail-badge { align-self: start; display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; border-radius: 999px; background: var(--mint); color: var(--green-dark); font-size: .65rem; font-weight: 800; }
         .detail-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+        .detail-badge.inactive { background: #edf1f6; color: var(--muted); }
+        .detail-badge.inactive::before { background: #8ca1bd; }
         .detail-body { min-height: 0; padding-top: 10px; }
         .spec-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px 16px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
         .spec { display: grid; grid-template-columns: 20px 1fr; gap: 7px; font-size: .68rem; color: var(--muted); }
@@ -96,7 +110,10 @@
             <article class="card panel-list">
                 <header class="panel-list-title">
                     <h2><i data-lucide="grid-2x2"></i>Modelos de paneles solares</h2>
-                    <span>Mostrando <strong id="panel-visible-count">{{ $panelModels->sum(fn ($panel) => max(1, $panel->farmPanels->count())) }}</strong> registros</span>
+                    <div class="panel-list-meta">
+                        <span>Mostrando <strong id="panel-visible-count">{{ $panelModels->sum(fn ($panel) => max(1, $panel->farmPanels->count())) }}</strong> registros</span>
+                        <a class="panel-add" href="{{ route('panels.create') }}" title="Registrar nuevo modelo"><i data-lucide="plus"></i></a>
+                    </div>
                 </header>
                 <div class="panel-table-wrap">
                     <table class="panel-table">
@@ -113,7 +130,7 @@
                         <tbody>
                             @foreach($panelModels as $panel)
                                 @forelse($panel->farmPanels as $installation)
-                                    <tr class="panel-row" data-panel-id="{{ $panel->id }}" data-brand="{{ $panel->brand }}" data-status="{{ $panel->status }}" data-farm="{{ $installation->solarFarm->name }}" data-search="{{ strtolower($panel->brand.' '.$panel->model) }}">
+                                    <tr class="panel-row" data-row-key="installation-{{ $installation->id }}" data-panel-id="{{ $panel->id }}" data-installation-id="{{ $installation->id }}" data-brand="{{ $panel->brand }}" data-status="{{ $panel->status }}" data-farm="{{ $installation->solarFarm->name }}" data-search="{{ strtolower($panel->brand.' '.$panel->model.' '.$installation->solarFarm->name) }}">
                                         <td><span class="panel-name"><span class="panel-mini"></span><strong>{{ $panel->brand }} {{ $panel->model }}</strong></span></td>
                                         <td>{{ number_format($panel->nominal_power_kw * 1000) }}</td>
                                         <td>{{ number_format($installation->quantity) }}</td>
@@ -133,7 +150,7 @@
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr class="panel-row" data-panel-id="{{ $panel->id }}" data-brand="{{ $panel->brand }}" data-status="{{ $panel->status }}" data-farm="" data-search="{{ strtolower($panel->brand.' '.$panel->model) }}">
+                                    <tr class="panel-row" data-row-key="model-{{ $panel->id }}" data-panel-id="{{ $panel->id }}" data-installation-id="" data-brand="{{ $panel->brand }}" data-status="{{ $panel->status }}" data-farm="" data-search="{{ strtolower($panel->brand.' '.$panel->model) }}">
                                         <td><span class="panel-name"><span class="panel-mini"></span><strong>{{ $panel->brand }} {{ $panel->model }}</strong></span></td>
                                         <td>{{ number_format($panel->nominal_power_kw * 1000) }}</td>
                                         <td>0</td>
@@ -173,11 +190,15 @@
                 <div class="detail-body">
                     <div class="spec-grid">
                         <div class="spec"><i data-lucide="zap"></i><span>Potencia nominal<br><strong id="detail-power">0 Wp</strong></span></div>
-                        <div class="spec"><i data-lucide="layers-3"></i><span>Tecnologia<br><strong>Monocristalino</strong></span></div>
-                        <div class="spec"><i data-lucide="box"></i><span>Tipo<br><strong>Modulo fotovoltaico</strong></span></div>
+                        <div class="spec"><i data-lucide="layers-3"></i><span>Tecnologia<br><strong id="detail-technology">Sin especificar</strong></span></div>
+                        <div class="spec"><i data-lucide="box"></i><span>Tipo<br><strong id="detail-type">Sin especificar</strong></span></div>
                         <div class="spec"><i data-lucide="activity"></i><span>Estado<br><strong id="detail-state">Activo</strong></span></div>
+                        <div class="spec"><i data-lucide="gauge"></i><span>Eficiencia<br><strong id="detail-efficiency">Sin especificar</strong></span></div>
+                        <div class="spec"><i data-lucide="ruler"></i><span>Dimensiones<br><strong id="detail-dimensions">Sin especificar</strong></span></div>
+                        <div class="spec"><i data-lucide="weight"></i><span>Peso<br><strong id="detail-weight">Sin especificar</strong></span></div>
+                        <div class="spec"><i data-lucide="shield-check"></i><span>Garantia<br><strong id="detail-warranty">Sin especificar</strong></span></div>
                     </div>
-                    <h3 class="installations-title">Instalacion</h3>
+                    <h3 class="installations-title">Instalacion seleccionada</h3>
                     <div class="installation-list" id="installation-list"></div>
                 </div>
             </aside>
@@ -192,7 +213,13 @@
         const farmFilter = document.getElementById('panel-farm-filter');
         const panelSearch = document.getElementById('panel-search');
 
-        function showPanel(id) {
+        function escapeHtml(value) {
+            const element = document.createElement('span');
+            element.textContent = String(value ?? '');
+            return element.innerHTML;
+        }
+
+        function showPanel(id, rowKey, installationId = null) {
             const panel = panelDetails[id];
 
             if (!panel) {
@@ -203,11 +230,20 @@
             document.getElementById('detail-brand').textContent = panel.brand;
             document.getElementById('detail-power').textContent = `${Math.round(panel.power_kw * 1000)} Wp`;
             document.getElementById('detail-status').textContent = panel.status === 'active' ? 'Activo' : 'Inactivo';
+            document.getElementById('detail-status').classList.toggle('inactive', panel.status !== 'active');
             document.getElementById('detail-state').textContent = panel.status === 'active' ? 'Activo' : 'Inactivo';
-            document.getElementById('installation-list').innerHTML = panel.farms.length
-                ? panel.farms.map(farm => `<div class="installation-row"><span>${farm.name}</span><strong>${Number(farm.quantity).toLocaleString()} paneles</strong></div>`).join('')
+            document.getElementById('detail-technology').textContent = panel.technology || 'Sin especificar';
+            document.getElementById('detail-type').textContent = panel.panel_type || 'Sin especificar';
+            document.getElementById('detail-efficiency').textContent = panel.efficiency ? `${panel.efficiency}%` : 'Sin especificar';
+            document.getElementById('detail-dimensions').textContent = panel.dimensions || 'Sin especificar';
+            document.getElementById('detail-weight').textContent = panel.weight_kg ? `${panel.weight_kg} kg` : 'Sin especificar';
+            document.getElementById('detail-warranty').textContent = panel.warranty_years ? `${panel.warranty_years} anos` : 'Sin especificar';
+
+            const selectedInstallation = panel.farms.find(farm => Number(farm.id) === Number(installationId));
+            document.getElementById('installation-list').innerHTML = selectedInstallation
+                ? `<div class="installation-row"><span>${escapeHtml(selectedInstallation.name)}<br><small>${escapeHtml(selectedInstallation.department)} · ${Number(selectedInstallation.capacity_kw).toLocaleString()} kW</small></span><strong>${Number(selectedInstallation.quantity).toLocaleString()} paneles</strong></div>`
                 : '<div class="installation-row"><span>Sin instalaciones asociadas</span></div>';
-            panelRows.forEach(row => row.classList.toggle('selected', Number(row.dataset.panelId) === Number(id)));
+            panelRows.forEach(row => row.classList.toggle('selected', row.dataset.rowKey === rowKey));
         }
 
         function filterPanels() {
@@ -227,13 +263,22 @@
             });
 
             document.getElementById('panel-visible-count').textContent = visible;
+
+            const selectedRow = panelRows.find(row => row.classList.contains('selected'));
+            const firstVisibleRow = panelRows.find(row => !row.hidden);
+            if ((!selectedRow || selectedRow.hidden) && firstVisibleRow) {
+                showPanel(firstVisibleRow.dataset.panelId, firstVisibleRow.dataset.rowKey, firstVisibleRow.dataset.installationId || null);
+            }
         }
 
-        panelRows.forEach(row => row.addEventListener('click', () => showPanel(row.dataset.panelId)));
+        panelRows.forEach(row => row.addEventListener('click', event => {
+            if (event.target.closest('a, button, form')) return;
+            showPanel(row.dataset.panelId, row.dataset.rowKey, row.dataset.installationId || null);
+        }));
         [brandFilter, statusFilter, farmFilter, panelSearch].forEach(control => control.addEventListener('input', filterPanels));
 
         if (panelRows.length) {
-            showPanel(panelRows[0].dataset.panelId);
+            showPanel(panelRows[0].dataset.panelId, panelRows[0].dataset.rowKey, panelRows[0].dataset.installationId || null);
         }
     </script>
 @endsection

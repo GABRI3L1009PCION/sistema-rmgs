@@ -135,4 +135,80 @@ class ManagementPagesTest extends TestCase
         $this->assertEqualsWithDelta(14.6333, (float) $farm->latitude, 0.0001);
         $this->assertEqualsWithDelta(-90.6064, (float) $farm->longitude, 0.0001);
     }
+
+    public function test_panel_rows_have_unique_installation_selection_keys(): void
+    {
+        $panel = PanelModel::where('brand', 'HelioTech')->with('farmPanels')->firstOrFail();
+        $response = $this->get(route('panels.index'));
+
+        $response->assertOk();
+        foreach ($panel->farmPanels as $installation) {
+            $response->assertSee('data-row-key="installation-'.$installation->id.'"', false);
+        }
+    }
+
+    public function test_panel_technical_data_and_installation_quantities_can_be_updated(): void
+    {
+        $panel = PanelModel::where('brand', 'HelioTech')->with('farmPanels')->firstOrFail();
+        $installation = $panel->farmPanels->firstOrFail();
+
+        $this->put(route('panels.update', $panel), [
+            'brand' => $panel->brand,
+            'model' => $panel->model,
+            'nominal_power_kw' => 0.555,
+            'technology' => 'Monocristalino bifacial N-Type',
+            'panel_type' => 'Modulo fotovoltaico bifacial',
+            'efficiency_percent' => 22.15,
+            'dimensions' => '2278 x 1134 x 35 mm',
+            'weight_kg' => 32.10,
+            'warranty_years' => 30,
+            'status' => 'active',
+            'installations' => [
+                $installation->id => ['quantity' => 475],
+            ],
+        ])->assertRedirect(route('panels.index'));
+
+        $this->assertDatabaseHas('panel_models', [
+            'id' => $panel->id,
+            'technology' => 'Monocristalino bifacial N-Type',
+            'efficiency_percent' => 22.15,
+            'warranty_years' => 30,
+        ]);
+        $this->assertDatabaseHas('farm_panels', [
+            'id' => $installation->id,
+            'quantity' => 475,
+        ]);
+    }
+
+    public function test_reports_apply_filters_and_report_type(): void
+    {
+        $farm = SolarFarm::has('energyRecords')->with(['department', 'energyRecords'])->firstOrFail();
+        $period = $farm->energyRecords->first()->period->format('Y-m');
+
+        $this->get(route('reports.index', [
+            'period' => $period,
+            'department_id' => $farm->department_id,
+            'farm_id' => $farm->id,
+            'type' => 'environment',
+        ]))
+            ->assertOk()
+            ->assertViewHas('selectedType', 'environment')
+            ->assertViewHas('records', fn ($records) => $records->isNotEmpty() && $records->every(fn ($record) => $record->solar_farm_id === $farm->id))
+            ->assertSee('Impacto ambiental')
+            ->assertSee($farm->name);
+    }
+
+    public function test_filtered_report_can_be_exported_to_csv(): void
+    {
+        $farm = SolarFarm::has('energyRecords')->with('energyRecords')->firstOrFail();
+        $period = $farm->energyRecords->first()->period->format('Y-m');
+
+        $this->get(route('reports.csv', [
+            'period' => $period,
+            'farm_id' => $farm->id,
+            'type' => 'executive',
+        ]))
+            ->assertOk()
+            ->assertDownload('reporte-executive-'.$period.'.csv');
+    }
 }

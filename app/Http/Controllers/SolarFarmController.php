@@ -9,6 +9,8 @@ use App\Models\PanelModel;
 use App\Models\SolarFarm;
 use App\Services\SolarMetricsService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class SolarFarmController extends Controller
@@ -107,8 +109,14 @@ class SolarFarmController extends Controller
     {
         $validated = $request->validate([
             'brand' => ['required', 'string', 'max:100'],
-            'model' => ['required', 'string', 'max:150'],
+            'model' => ['required', 'string', 'max:150', Rule::unique('panel_models')->where(fn ($query) => $query->where('brand', $request->brand))],
             'nominal_power_kw' => ['required', 'numeric', 'min:0.001'],
+            'technology' => ['required', 'string', 'max:100'],
+            'panel_type' => ['required', 'string', 'max:100'],
+            'efficiency_percent' => ['nullable', 'numeric', 'between:0.01,100'],
+            'dimensions' => ['nullable', 'string', 'max:100'],
+            'weight_kg' => ['nullable', 'numeric', 'min:0'],
+            'warranty_years' => ['nullable', 'integer', 'between:1,100'],
             'status' => ['required', 'in:active,inactive'],
         ]);
 
@@ -119,6 +127,8 @@ class SolarFarmController extends Controller
 
     public function editPanel(PanelModel $panel)
     {
+        $panel->load('farmPanels.solarFarm');
+
         return view('panels.edit', [
             'panel' => $panel,
         ]);
@@ -128,12 +138,31 @@ class SolarFarmController extends Controller
     {
         $validated = $request->validate([
             'brand' => ['required', 'string', 'max:100'],
-            'model' => ['required', 'string', 'max:150'],
+            'model' => ['required', 'string', 'max:150', Rule::unique('panel_models')->where(fn ($query) => $query->where('brand', $request->brand))->ignore($panel->id)],
             'nominal_power_kw' => ['required', 'numeric', 'min:0.001'],
+            'technology' => ['required', 'string', 'max:100'],
+            'panel_type' => ['required', 'string', 'max:100'],
+            'efficiency_percent' => ['nullable', 'numeric', 'between:0.01,100'],
+            'dimensions' => ['nullable', 'string', 'max:100'],
+            'weight_kg' => ['nullable', 'numeric', 'min:0'],
+            'warranty_years' => ['nullable', 'integer', 'between:1,100'],
             'status' => ['required', 'in:active,inactive'],
+            'installations' => ['sometimes', 'array'],
+            'installations.*.quantity' => ['required', 'integer', 'min:1'],
         ]);
 
-        $panel->update($validated);
+        $installations = $validated['installations'] ?? [];
+        unset($validated['installations']);
+
+        DB::transaction(function () use ($panel, $validated, $installations) {
+            $panel->update($validated);
+
+            foreach ($installations as $installationId => $data) {
+                $panel->farmPanels()->whereKey($installationId)->update([
+                    'quantity' => $data['quantity'],
+                ]);
+            }
+        });
 
         return redirect()->route('panels.index')->with('status', 'Modelo de panel actualizado correctamente.');
     }

@@ -109,51 +109,119 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function reports()
+    public function reports(Request $request)
     {
-        $farms = SolarFarm::with(['department', 'farmPanels.panelModel', 'energyRecords'])->get();
-        $records = EnergyRecord::with('solarFarm.department')->orderByDesc('period')->get();
-        $latestPeriod = $records->max('period');
-        $currentRecords = $latestPeriod
-            ? $records->filter(fn (EnergyRecord $record) => $record->period->format('Y-m') === $latestPeriod->format('Y-m'))
-            : collect();
-
-        return view('reports.index', [
-            'farms' => $farms->sortBy('name'),
-            'departments' => Department::orderBy('name')->get(),
-            'latestPeriod' => $latestPeriod,
-            'stats' => [
-                'actual_kwh' => round($currentRecords->sum('actual_kwh'), 2),
-                'daily_average' => round($currentRecords->sum('actual_kwh') / 30, 2),
-                'co2_tons' => round($currentRecords->sum('co2_avoided_kg') / 1000, 2),
-                'active_farms' => $farms->where('status', 'active')->count(),
-                'panels' => $farms->sum(fn (SolarFarm $farm) => $farm->farmPanels->sum('quantity')),
-            ],
-            'generationSeries' => $this->generationSeries($records),
-            'departmentSeries' => $currentRecords->groupBy(fn (EnergyRecord $record) => $record->solarFarm->department->name)
-                ->map(fn ($items) => round($items->sum('actual_kwh'), 2))->sortDesc()->toArray(),
-        ]);
+        return view('reports.index', $this->reportData($request));
     }
 
-    public function reportCsv()
+    public function reportCsv(Request $request)
     {
-        $records = EnergyRecord::with('solarFarm.department')->orderByDesc('period')->get();
+        $data = $this->reportData($request);
+        $records = $data['records'];
 
-        return response()->streamDownload(function () use ($records) {
+        return response()->streamDownload(function () use ($records, $data) {
             $output = fopen('php://output', 'w');
-            fputcsv($output, ['Periodo', 'Granja', 'Departamento', 'Generacion real kWh', 'Generacion esperada kWh', 'CO2 evitado kg']);
+            fputcsv($output, ['Reporte RMGS', $data['reportTypeName']]);
+            fputcsv($output, ['Periodo', $data['selectedPeriodLabel'], 'Departamento', $data['selectedDepartmentName'], 'Granja', $data['selectedFarmName']]);
+            fputcsv($output, []);
+            fputcsv($output, ['Periodo', 'Granja', 'Departamento', 'Generacion real kWh', 'Generacion esperada kWh', 'Diferencia kWh', 'Cumplimiento %', 'CO2 evitado kg']);
             foreach ($records as $record) {
-                fputcsv($output, [$record->period->format('Y-m'), $record->solarFarm->name, $record->solarFarm->department->name, $record->actual_kwh, $record->expected_kwh, $record->co2_avoided_kg]);
+                $difference = $record->actual_kwh - $record->expected_kwh;
+                $compliance = $record->expected_kwh > 0 ? $record->actual_kwh / $record->expected_kwh * 100 : 0;
+                fputcsv($output, [$record->period->format('Y-m'), $record->solarFarm->name, $record->solarFarm->department->name, $record->actual_kwh, $record->expected_kwh, round($difference, 2), round($compliance, 2), $record->co2_avoided_kg]);
             }
             fclose($output);
-        }, 'reporte-generacion-rmgs.csv', ['Content-Type' => 'text/csv']);
+        }, 'reporte-'.$data['selectedType'].'-'.$data['selectedPeriod'].'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
-    public function reportPrint()
+    public function reportPrint(Request $request)
     {
-        return view('reports.print', [
-            'records' => EnergyRecord::with('solarFarm.department')->orderByDesc('period')->get(),
-        ]);
+        return view('reports.print', $this->reportData($request));
+    }
+
+    private function reportData(Request $request): array
+    {
+        $farms = SolarFarm::with(['department', 'farmPanels.panelModel'])->orderBy('name')->get();
+        $allRecords = EnergyRecord::with('solarFarm.department')->orderBy('period')->get();
+        $periods = $allRecords->map(fn (EnergyRecord $record) => $record->period->format('Y-m'))->unique()->sortDesc()->values();
+        $requestedPeriod = $request->string('period')->toString();
+        $selectedPeriod = $periods->contains($requestedPeriod) ? $requestedPeriod : ($periods->first() ?? now()->format('Y-m'));
+        $selectedDepartmentId = $request->integer('department_id') ?: null;
+        $selectedFarmId = $request->integer('farm_id') ?: null;
+        $selectedType = in_array($request->input('type'), ['generation', 'environment', 'executive'], true)
+            ? $request->input('type')
+            : 'generation';
+
+        $scopeFarms = $farms
+            ->when($selectedDepartmentId, fn (Collection $items) => $items->where('department_id', $selectedDepartmentId))
+            ->when($selectedFarmId, fn (Collection $items) => $items->where('id', $selectedFarmId));
+        $scopeFarmIds = $scopeFarms->pluck('id');
+        $scopeRecords = $allRecords->whereIn('solar_farm_id', $scopeFarmIds);
+        $records = $scopeRecords->filter(fn (EnergyRecord $record) => $record->period->format('Y-m') === $selectedPeriod)->values();
+        $trendRecords = $scopeRecords->filter(fn (EnergyRecord $record) => $record->period->format('Y-m') <= $selectedPeriod);
+        $generationSeries = collect($this->generationSeries($trendRecords))->take(-6)->toArray();
+
+        $actual = (float) $records->sum('actual_kwh');
+        $expected = (float) $records->sum('expected_kwh');
+        $co2Tons = (float) $records->sum('co2_avoided_kg') / 1000;
+        $days = Carbon::createFromFormat('Y-m-d', $selectedPeriod.'-01')->daysInMonth;
+        $compliance = $expected > 0 ? $actual / $expected * 100 : 0;
+        $reportTypeNames = [
+            'generation' => 'Generacion de energia',
+            'environment' => 'Impacto ambiental',
+            'executive' => 'Resumen ejecutivo',
+        ];
+        $summary = match ($selectedType) {
+            'environment' => [
+                ['leaf', 'CO2 evitado', number_format($co2Tons, 2).' t'],
+                ['scale', 'Factor aplicado', '0.40 kg/kWh'],
+                ['landmark', 'Granjas con datos', number_format($records->pluck('solar_farm_id')->unique()->count())],
+                ['bar-chart-3', 'Promedio por granja', number_format($records->count() ? $co2Tons / $records->count() : 0, 2).' t'],
+            ],
+            'executive' => [
+                ['zap', 'Generacion real', number_format($actual).' kWh'],
+                ['target', 'Generacion esperada', number_format($expected).' kWh'],
+                ['gauge', 'Cumplimiento', number_format($compliance, 1).'%'],
+                ['landmark', 'Granjas activas', number_format($scopeFarms->where('status', 'active')->count())],
+            ],
+            default => [
+                ['zap', 'Generacion total', number_format($actual).' kWh'],
+                ['bar-chart-3', 'Promedio diario', number_format($actual / max($days, 1)).' kWh'],
+                ['trending-up', 'Maxima registrada', number_format((float) $records->max('actual_kwh')).' kWh'],
+                ['trending-down', 'Minima registrada', number_format((float) $records->min('actual_kwh')).' kWh'],
+            ],
+        };
+        $departmentSeries = $records->groupBy(fn (EnergyRecord $record) => $record->solarFarm->department->name)
+            ->map(fn (Collection $items) => round($selectedType === 'environment' ? $items->sum('co2_avoided_kg') / 1000 : $items->sum('actual_kwh'), 2))
+            ->sortDesc()
+            ->toArray();
+
+        return [
+            'farms' => $farms,
+            'departments' => Department::orderBy('name')->get(),
+            'periods' => $periods,
+            'records' => $records,
+            'selectedPeriod' => $selectedPeriod,
+            'selectedPeriodLabel' => Carbon::createFromFormat('Y-m-d', $selectedPeriod.'-01')->translatedFormat('F Y'),
+            'selectedDepartmentId' => $selectedDepartmentId,
+            'selectedDepartmentName' => $selectedDepartmentId ? (Department::find($selectedDepartmentId)?->name ?? 'Sin resultados') : 'Todos los departamentos',
+            'selectedFarmId' => $selectedFarmId,
+            'selectedFarmName' => $selectedFarmId ? ($farms->firstWhere('id', $selectedFarmId)?->name ?? 'Sin resultados') : 'Todas las granjas',
+            'selectedType' => $selectedType,
+            'reportTypeName' => $reportTypeNames[$selectedType],
+            'summary' => $summary,
+            'stats' => [
+                'actual_kwh' => round($actual, 2),
+                'expected_kwh' => round($expected, 2),
+                'daily_average' => round($actual / max($days, 1), 2),
+                'co2_tons' => round($co2Tons, 2),
+                'active_farms' => $scopeFarms->where('status', 'active')->count(),
+                'panels' => $scopeFarms->sum(fn (SolarFarm $farm) => $farm->farmPanels->sum('quantity')),
+                'compliance' => round($compliance, 2),
+            ],
+            'generationSeries' => $generationSeries,
+            'departmentSeries' => $departmentSeries,
+        ];
     }
 
     public function alerts()
