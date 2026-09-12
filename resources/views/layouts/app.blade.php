@@ -59,19 +59,22 @@
         .sidebar-head { position: relative; }
         .sidebar-toggle {
             position: absolute;
-            top: 2px;
-            right: 2px;
-            width: 34px;
-            height: 34px;
+            top: 30px;
+            right: -19px;
+            width: 42px;
+            height: 42px;
             display: grid;
             place-items: center;
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, .92);
-            color: #4d6591;
+            border: 2px solid #d7e7f7;
+            border-radius: 999px;
+            background: #ffffff;
+            color: var(--blue);
             cursor: pointer;
-            box-shadow: 0 8px 18px rgba(23, 58, 111, .08);
-            z-index: 2;
+            box-shadow: 0 10px 24px rgba(23, 58, 111, .18);
+            z-index: 20;
+        }
+        .sidebar-toggle:hover { color: var(--green-dark); border-color: #9bd7b3; background: #f7fffb; }
+        .sidebar-toggle svg { width: 23px; height: 23px; stroke-width: 2.8; }
         }
         .side-nav { display: grid; gap: 4px; }
         .side-link {
@@ -90,7 +93,7 @@
         .app-shell.sidebar-collapsed .sidebar { padding-inline: 10px; }
         .app-shell.sidebar-collapsed .brand { width: 48px; height: 54px; margin: 8px auto 18px; overflow: hidden; }
         .app-shell.sidebar-collapsed .brand img { width: 130px; max-width: none; height: 54px; object-fit: contain; object-position: left center; }
-        .app-shell.sidebar-collapsed .sidebar-toggle { right: -4px; transform: rotate(180deg); }
+        .app-shell.sidebar-collapsed .sidebar-toggle { right: -21px; transform: rotate(180deg); }
         .app-shell.sidebar-collapsed .side-link {
             grid-template-columns: 1fr;
             justify-items: center;

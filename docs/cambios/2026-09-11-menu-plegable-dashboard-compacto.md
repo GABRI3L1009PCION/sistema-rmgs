@@ -11,6 +11,7 @@ El dashboard ocupaba mas altura de la necesaria y obligaba a hacer scroll para v
 ## Cambios realizados
 
 - Se agrego un boton para ocultar y mostrar el menu lateral.
+- Se ajusto el boton como control flotante visible entre el menu y el contenido principal.
 - El estado del menu se guarda en `localStorage` para conservar la preferencia del usuario.
 - Al colapsarse, el menu muestra solo iconos y conserva tooltips por titulo.
 - El dashboard se compacto en tres franjas:
