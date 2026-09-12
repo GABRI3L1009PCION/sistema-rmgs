@@ -6,6 +6,7 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 
 ### Cambiado
 
+- Actualizada la documentacion general para reflejar el servicio de reglas solares y sus pruebas unitarias.
 - Actualizado el flujo Git para describir normas generales de ramas, commits, push e integracion sin mencionar usuarios especificos.
 - Actualizado el checklist de rubrica con control de versiones y evidencia de trabajo incremental.
 - Reforzada la regla de integracion: las ramas personales solo se integran a `develop`; `main` se reserva para la version final terminada y probada.

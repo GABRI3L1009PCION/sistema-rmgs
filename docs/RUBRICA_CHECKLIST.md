@@ -38,6 +38,8 @@
 - [x] Alertas por desviacion de 20%.
 - [x] Proyeccion por promedio movil.
 - [x] API REST.
+- [x] Reglas de negocio centralizadas en servicio.
+- [x] Pruebas unitarias de calculos solares.
 - [ ] CRUD completo para editar/desactivar granjas.
 - [ ] CRUD completo para registros historicos.
 
@@ -46,6 +48,7 @@
 - [x] README tecnico.
 - [x] Diagrama de base de datos en Mermaid.
 - [x] Documentacion minima de API.
+- [x] Documentacion de reglas solares y pruebas.
 - [x] Flujo Git y normas de commits documentadas.
 - [x] CHANGELOG.
 - [x] Regla documentada para crear un `.md` por cada cambio solicitado.
