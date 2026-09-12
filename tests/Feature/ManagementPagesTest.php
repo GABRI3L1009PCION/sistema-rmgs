@@ -93,6 +93,26 @@ class ManagementPagesTest extends TestCase
         $this->assertNotEmpty($response->json('top_farms'));
     }
 
+    public function test_generation_page_exposes_records_for_live_filters(): void
+    {
+        $record = EnergyRecord::with('solarFarm.department')->firstOrFail();
+
+        $this->get(route('records.index'))
+            ->assertOk()
+            ->assertDontSee('Nueva lectura')
+            ->assertDontSee('records.create', false)
+            ->assertSee('generationRecords', false)
+            ->assertSee('"id":'.$record->id, false)
+            ->assertSee('data-record-id="'.$record->id.'"', false)
+            ->assertSee('generation-total', false)
+            ->assertSee('generation-farm-filter', false);
+    }
+
+    public function test_generation_manual_record_routes_are_not_available(): void
+    {
+        $this->get('/generacion/nueva')->assertNotFound();
+    }
+
     public function test_farm_update_rejects_municipality_from_other_department(): void
     {
         $farm = SolarFarm::firstOrFail();

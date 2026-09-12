@@ -32,11 +32,6 @@ Route::middleware('auth')->group(function () {
     Route::put('/paneles/{panel}', [SolarFarmController::class, 'updatePanel'])->name('panels.update');
     Route::patch('/paneles/{panel}/desactivar', [SolarFarmController::class, 'deactivatePanel'])->name('panels.deactivate');
     Route::get('/generacion', [SolarFarmController::class, 'generation'])->name('records.index');
-    Route::get('/generacion/nueva', [SolarFarmController::class, 'createRecord'])->name('records.create');
-    Route::post('/generacion', [SolarFarmController::class, 'storeRecord'])->name('records.store');
-    Route::get('/generacion/{record}/editar', [SolarFarmController::class, 'editRecord'])->name('records.edit');
-    Route::put('/generacion/{record}', [SolarFarmController::class, 'updateRecord'])->name('records.update');
-    Route::delete('/generacion/{record}', [SolarFarmController::class, 'destroyRecord'])->name('records.destroy');
     Route::get('/reportes', [DashboardController::class, 'reports'])->name('reports.index');
     Route::get('/reportes/excel', [DashboardController::class, 'reportCsv'])->name('reports.csv');
     Route::get('/reportes/pdf', [DashboardController::class, 'reportPrint'])->name('reports.print');

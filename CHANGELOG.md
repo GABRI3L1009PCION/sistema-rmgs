@@ -22,6 +22,8 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 - Vista de granjas actualizada con acceso visible para registrar una nueva granja solar.
 - Formulario de nueva granja actualizado para sugerir generacion esperada mensual a partir de capacidad instalada.
 - Granjas solares actualizado para sincronizar filtros de departamento/municipio con tabla y mapa, y validar municipios por departamento.
+- Vista de generacion actualizada para recalcular KPIs, graficas, tabla y filtro de granjas con los datos historicos reales.
+- Vista de generacion ajustada como consulta de monitoreo: sin boton de nueva lectura ni acciones manuales en registros historicos.
 - Notificaciones del sistema rediseñadas como toasts flotantes con cierre automatico.
 - Modo oscuro corregido en reportes, alertas, proyecciones y mapa para evitar tarjetas blancas, tablas claras y graficas con contraste incorrecto.
 - Paleta visual global rediseñada con superficies mas calidas, mejor contraste y soporte de modo oscuro.
@@ -57,6 +59,8 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 - Documento `docs/cambios/2026-09-12-acceso-nueva-granja.md` con el detalle del acceso visible al registro de granjas.
 - Documento `docs/cambios/2026-09-12-generacion-esperada-automatica.md` con el detalle del calculo sugerido de generacion esperada.
 - Documento `docs/cambios/2026-09-12-granjas-filtros-municipios.md` con el detalle de filtros y municipios dependientes.
+- Documento `docs/cambios/2026-09-12-generacion-filtros-funcionales.md` con el detalle de la funcionalidad de filtros de generacion.
+- Documento `docs/cambios/2026-09-12-generacion-solo-monitoreo.md` con el detalle del retiro de acciones manuales en generacion.
 - Alternador de tema claro/oscuro persistente en el navegador.
 - Pantalla de login, rutas de sesion y usuario demo sembrado para acceder al sistema.
 - Pruebas de autenticacion para validar carga del login, acceso con usuario demo y cierre de sesion.

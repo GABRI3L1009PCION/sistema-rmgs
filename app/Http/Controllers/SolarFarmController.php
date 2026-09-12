@@ -179,9 +179,7 @@ class SolarFarmController extends Controller
         $records = EnergyRecord::with('solarFarm.department')->orderByDesc('period')->get();
         $farms = SolarFarm::with('department')->orderBy('name')->get();
         $latestPeriod = $records->max('period');
-        $currentRecords = $latestPeriod
-            ? $records->filter(fn (EnergyRecord $record) => $record->period->format('Y-m') === $latestPeriod->format('Y-m'))
-            : collect();
+        $currentRecords = $records;
         $actual = (float) $currentRecords->sum('actual_kwh');
         $expected = (float) $currentRecords->sum('expected_kwh');
 
@@ -204,6 +202,16 @@ class SolarFarmController extends Controller
             'farmSeries' => $currentRecords->groupBy('solar_farm_id')->map(fn ($items) => [
                 'name' => $items->first()->solarFarm->name,
                 'actual' => round($items->sum('actual_kwh'), 2),
+            ])->values(),
+            'recordData' => $records->map(fn (EnergyRecord $record) => [
+                'id' => $record->id,
+                'period' => $record->period->format('Y-m'),
+                'period_label' => $record->period->format('m/Y'),
+                'farm' => $record->solarFarm->name,
+                'department' => $record->solarFarm->department->name,
+                'actual' => (float) $record->actual_kwh,
+                'expected' => (float) $record->expected_kwh,
+                'co2_kg' => (float) $record->co2_avoided_kg,
             ])->values(),
         ]);
     }

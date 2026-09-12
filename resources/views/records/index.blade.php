@@ -34,9 +34,9 @@
     <div class="generation-screen">
         <section class="generation-hero">
             <div>
-                <span>RMGS - Bitacora energetica</span>
-                <h1>Generacion mensual</h1>
-                <p>Compara lecturas reales contra metas esperadas y corrige historicos desde una sola vista operativa.</p>
+                <span>RMGS - Bitácora energética</span>
+                <h1>Generación mensual</h1>
+                <p>Compara lecturas reales contra metas esperadas y corrige históricos desde una sola vista operativa.</p>
             </div>
             <div class="generation-hero-note"><i data-lucide="activity"></i><span>Las alertas se recalculan al guardar cada lectura.</span></div>
         </section>
@@ -46,7 +46,7 @@
                 <select id="period-filter">
                     <option value="">Todos los periodos</option>
                     @foreach($records->groupBy(fn($record) => $record->period->format('Y-m')) as $period => $items)
-                        <option value="{{ $period }}" @selected($latestPeriod && $period === $latestPeriod->format('Y-m'))>{{ $items->first()->period->format('m/Y') }}</option>
+                        <option value="{{ $period }}">{{ $items->first()->period->format('m/Y') }}</option>
                     @endforeach
                 </select>
             </label>
@@ -65,10 +65,10 @@
         </section>
 
         <section class="grid metric-row">
-            <article class="card metric-card"><i class="green" data-lucide="zap"></i><div><span class="muted">Generacion total</span><strong>{{ number_format($stats['actual_kwh']) }} kWh</strong></div></article>
-            <article class="card metric-card"><i data-lucide="bar-chart-3"></i><div><span class="muted">Promedio diario</span><strong>{{ number_format($stats['daily_average']) }} kWh</strong></div></article>
-            <article class="card metric-card"><i data-lucide="target"></i><div><span class="muted">Cumplimiento</span><strong>{{ number_format($stats['compliance'], 1) }}%</strong></div></article>
-            <article class="card metric-card"><i class="green" data-lucide="leaf"></i><div><span class="muted">CO2 evitado</span><strong>{{ number_format($stats['co2_tons'], 1) }} t</strong></div></article>
+            <article class="card metric-card"><i class="green" data-lucide="zap"></i><div><span class="muted">Generación total</span><strong id="generation-total">{{ number_format($stats['actual_kwh']) }} kWh</strong></div></article>
+            <article class="card metric-card"><i data-lucide="bar-chart-3"></i><div><span class="muted">Promedio diario</span><strong id="generation-daily-average">{{ number_format($stats['daily_average']) }} kWh</strong></div></article>
+            <article class="card metric-card"><i data-lucide="target"></i><div><span class="muted">Cumplimiento</span><strong id="generation-compliance">{{ number_format($stats['compliance'], 1) }}%</strong></div></article>
+            <article class="card metric-card"><i class="green" data-lucide="leaf"></i><div><span class="muted">CO2 evitado</span><strong id="generation-co2">{{ number_format($stats['co2_tons'], 1) }} t</strong></div></article>
         </section>
 
         <section class="generation-layout">
@@ -77,22 +77,22 @@
                 <div class="chart-wrap"><canvas id="generation-history-chart"></canvas></div>
             </article>
             <article class="card chart-panel">
-                <div class="card-title"><h2>Produccion por granja</h2><span class="muted">{{ $latestPeriod?->format('m/Y') ?? 'Sin periodo' }}</span></div>
+                <div class="card-title"><h2>Producción por granja</h2><span class="muted" id="farm-chart-period">{{ $latestPeriod?->format('m/Y') ?? 'Sin periodo' }}</span></div>
                 <div class="chart-wrap"><canvas id="generation-farm-chart"></canvas></div>
             </article>
         </section>
 
         <section class="card">
-            <div class="card-title"><h2>Registros historicos</h2><a class="btn primary" href="{{ route('records.create') }}"><i data-lucide="plus"></i>Nueva lectura</a></div>
+            <div class="card-title"><h2>Registros históricos</h2><span class="muted">Lecturas cargadas desde la base de datos</span></div>
             <table class="records-table">
-                <thead><tr><th>Periodo</th><th>Granja</th><th>Departamento</th><th>Real</th><th>Esperada</th><th>Diferencia</th><th>Cumplimiento</th><th style="text-align:right">Acciones</th></tr></thead>
+                <thead><tr><th>Periodo</th><th>Granja</th><th>Departamento</th><th>Real</th><th>Esperada</th><th>Diferencia</th><th>Cumplimiento</th></tr></thead>
                 <tbody>
                     @foreach($records as $record)
                         @php
                             $difference = $record->actual_kwh - $record->expected_kwh;
                             $compliance = $record->expected_kwh > 0 ? ($record->actual_kwh / $record->expected_kwh) * 100 : 0;
                         @endphp
-                        <tr class="generation-record" data-period="{{ $record->period->format('Y-m') }}" data-department="{{ $record->solarFarm->department->name }}" data-farm="{{ $record->solarFarm->name }}">
+                        <tr class="generation-record" data-record-id="{{ $record->id }}" data-period="{{ $record->period->format('Y-m') }}" data-department="{{ $record->solarFarm->department->name }}" data-farm="{{ $record->solarFarm->name }}" data-actual="{{ $record->actual_kwh }}" data-expected="{{ $record->expected_kwh }}" data-co2="{{ $record->co2_avoided_kg }}">
                             <td>{{ $record->period->format('m/Y') }}</td>
                             <td><strong>{{ $record->solarFarm->name }}</strong></td>
                             <td>{{ $record->solarFarm->department->name }}</td>
@@ -100,16 +100,6 @@
                             <td>{{ number_format($record->expected_kwh) }} kWh</td>
                             <td class="{{ $difference >= 0 ? 'difference-positive' : 'difference-negative' }}">{{ $difference >= 0 ? '+' : '' }}{{ number_format($difference) }} kWh</td>
                             <td>{{ number_format($compliance, 1) }}%</td>
-                            <td>
-                                <span class="record-actions">
-                                    <a class="btn" href="{{ route('records.edit', $record) }}"><i data-lucide="pencil"></i></a>
-                                    <form method="post" action="{{ route('records.destroy', $record) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn danger" type="submit"><i data-lucide="trash-2"></i></button>
-                                    </form>
-                                </span>
-                            </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -120,9 +110,18 @@
     <script>
         const generationSeries = @json($generationSeries);
         const farmSeries = @json($farmSeries);
+        const generationRecords = @json($recordData);
         const historyLabels = Object.keys(generationSeries);
 
-        new Chart(document.getElementById('generation-history-chart'), {
+        const numberFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+        const decimalFormatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        const totalOutput = document.getElementById('generation-total');
+        const dailyOutput = document.getElementById('generation-daily-average');
+        const complianceOutput = document.getElementById('generation-compliance');
+        const co2Output = document.getElementById('generation-co2');
+        const farmChartPeriod = document.getElementById('farm-chart-period');
+
+        const historyChart = new Chart(document.getElementById('generation-history-chart'), {
             type: 'line',
             data: {
                 labels: historyLabels,
@@ -134,7 +133,7 @@
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } },
         });
 
-        new Chart(document.getElementById('generation-farm-chart'), {
+        const farmChart = new Chart(document.getElementById('generation-farm-chart'), {
             type: 'bar',
             data: { labels: farmSeries.map(item => item.name), datasets: [{ data: farmSeries.map(item => item.actual), backgroundColor: '#1689f4', borderRadius: 4 }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } },
@@ -145,14 +144,107 @@
         const departmentFilter = document.getElementById('generation-department-filter');
         const farmFilter = document.getElementById('generation-farm-filter');
 
-        function filterRecords() {
-            generationRows.forEach(row => {
-                row.hidden = !!((periodFilter.value && row.dataset.period !== periodFilter.value)
-                    || (departmentFilter.value && row.dataset.department !== departmentFilter.value)
-                    || (farmFilter.value && row.dataset.farm !== farmFilter.value));
-            });
+        function selectedRecords() {
+            return generationRecords.filter(record => (!periodFilter.value || record.period === periodFilter.value)
+                && (!departmentFilter.value || record.department === departmentFilter.value)
+                && (!farmFilter.value || record.farm === farmFilter.value));
         }
 
-        [periodFilter, departmentFilter, farmFilter].forEach(control => control.addEventListener('input', filterRecords));
+        function refreshFarmOptions() {
+            const currentFarm = farmFilter.value;
+            const farmNames = [...new Set(generationRecords
+                .filter(record => !departmentFilter.value || record.department === departmentFilter.value)
+                .map(record => record.farm))]
+                .sort();
+
+            farmFilter.innerHTML = '<option value="">Todas las granjas</option>';
+            farmNames.forEach(farmName => {
+                const option = document.createElement('option');
+                option.value = farmName;
+                option.textContent = farmName;
+                option.selected = farmName === currentFarm;
+                farmFilter.appendChild(option);
+            });
+
+            if (currentFarm && !farmNames.includes(currentFarm)) {
+                farmFilter.value = '';
+            }
+        }
+
+        function groupRecords(records, key, mapper) {
+            return records.reduce((groups, record) => {
+                const groupKey = mapper ? mapper(record) : record[key];
+                groups[groupKey] ??= [];
+                groups[groupKey].push(record);
+                return groups;
+            }, {});
+        }
+
+        function sum(records, field) {
+            return records.reduce((total, record) => total + Number(record[field] || 0), 0);
+        }
+
+        function updateMetrics(records) {
+            const actual = sum(records, 'actual');
+            const expected = sum(records, 'expected');
+            const co2Tons = sum(records, 'co2_kg') / 1000;
+            const periodCount = Math.max(new Set(records.map(record => record.period)).size, 1);
+            const dailyAverage = actual / (periodCount * 30);
+            const compliance = expected > 0 ? (actual / expected) * 100 : 0;
+
+            totalOutput.textContent = `${numberFormatter.format(actual)} kWh`;
+            dailyOutput.textContent = `${numberFormatter.format(dailyAverage)} kWh`;
+            complianceOutput.textContent = `${decimalFormatter.format(compliance)}%`;
+            co2Output.textContent = `${decimalFormatter.format(co2Tons)} t`;
+        }
+
+        function updateHistoryChart(records) {
+            const periodGroups = groupRecords(records, 'period');
+            const labels = Object.keys(periodGroups).sort();
+
+            historyChart.data.labels = labels;
+            historyChart.data.datasets[0].data = labels.map(period => sum(periodGroups[period], 'actual'));
+            historyChart.data.datasets[1].data = labels.map(period => sum(periodGroups[period], 'expected'));
+            historyChart.update();
+        }
+
+        function updateFarmChart(records) {
+            const farmGroups = groupRecords(records, 'farm');
+            const labels = Object.keys(farmGroups).sort();
+
+            farmChart.data.labels = labels;
+            farmChart.data.datasets[0].data = labels.map(farm => sum(farmGroups[farm], 'actual'));
+            farmChart.update();
+
+            if (periodFilter.value) {
+                const selected = generationRecords.find(record => record.period === periodFilter.value);
+                farmChartPeriod.textContent = selected?.period_label ?? periodFilter.value;
+                return;
+            }
+
+            farmChartPeriod.textContent = 'Periodos filtrados';
+        }
+
+        function filterRecords() {
+            const records = selectedRecords();
+            const visibleIds = new Set(records.map(record => String(record.id)));
+
+            generationRows.forEach(row => {
+                row.hidden = !visibleIds.has(row.dataset.recordId);
+            });
+
+            updateMetrics(records);
+            updateHistoryChart(records);
+            updateFarmChart(records);
+        }
+
+        periodFilter.addEventListener('input', filterRecords);
+        departmentFilter.addEventListener('input', () => {
+            refreshFarmOptions();
+            filterRecords();
+        });
+        farmFilter.addEventListener('input', filterRecords);
+        refreshFarmOptions();
+        filterRecords();
     </script>
 @endsection
