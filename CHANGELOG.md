@@ -12,6 +12,7 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 
 ### Agregado
 
+- Documento `docs/ESTADO_Y_REPARTO.md` con avance actual, pendientes y division de trabajo entre los integrantes.
 - Inicializacion del proyecto Laravel para el Sistema RMGS.
 - Modelos, migraciones y relaciones principales: departamentos, granjas solares, paneles, registros de generacion y alertas.
 - Seeders con los 22 departamentos de Guatemala y datos demo.
