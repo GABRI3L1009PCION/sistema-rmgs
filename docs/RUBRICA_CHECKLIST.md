@@ -37,8 +37,8 @@
 - [x] Alertas por desviacion de 20%.
 - [x] Proyeccion por promedio movil.
 - [x] API REST.
-- [ ] CRUD completo para editar/desactivar granjas.
-- [ ] CRUD completo para registros historicos.
+- [x] CRUD completo para editar/desactivar granjas.
+- [x] CRUD completo para registros historicos.
 
 ## Documentacion
 
@@ -47,7 +47,8 @@
 - [x] Documentacion minima de API.
 - [x] Roles/flujo Git documentado.
 - [x] CHANGELOG.
-- [ ] Manual breve de usuario con capturas.
+- [x] Manual breve de usuario.
+- [ ] Capturas del manual de usuario.
 
 ## Presentacion
 

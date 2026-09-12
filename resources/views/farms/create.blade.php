@@ -58,7 +58,7 @@
 
             <div class="nav section">
                 <button class="btn primary" type="submit">Guardar granja</button>
-                <a class="btn" href="/">Cancelar</a>
+                <a class="btn" href="{{ route('farms.index') }}">Cancelar</a>
             </div>
         </form>
     </section>
