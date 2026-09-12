@@ -9,6 +9,7 @@ use App\Models\PanelModel;
 use App\Models\SolarFarm;
 use App\Services\SolarMetricsService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class SolarFarmController extends Controller
 {
@@ -21,6 +22,7 @@ class SolarFarmController extends Controller
         return view('farms.index', [
             'farms' => $farms,
             'departments' => Department::orderBy('name')->get(),
+            'municipalitiesByDepartment' => $this->municipalitiesByDepartment(),
             'stats' => [
                 'farms' => $farms->count(),
                 'panels' => $farms->sum(fn (SolarFarm $farm) => $farm->farmPanels->sum('quantity')),
@@ -31,6 +33,8 @@ class SolarFarmController extends Controller
                 'id' => $farm->id,
                 'name' => $farm->name,
                 'department' => $farm->department->name,
+                'department_id' => $farm->department_id,
+                'municipality' => $farm->municipality,
                 'lat' => (float) $farm->latitude,
                 'lng' => (float) $farm->longitude,
                 'status' => $farm->status,
@@ -43,6 +47,8 @@ class SolarFarmController extends Controller
     {
         return view('farms.create', [
             'departments' => Department::orderBy('name')->get(),
+            'municipalitiesByDepartment' => $this->municipalitiesByDepartment(),
+            'municipalityCoordinates' => $this->locationDefaultsByDepartment(),
             'panelModels' => PanelModel::where('status', 'active')->orderBy('brand')->get(),
         ]);
     }
@@ -189,6 +195,9 @@ class SolarFarmController extends Controller
             'actual_kwh' => ['required', 'numeric', 'min:0'],
         ]);
 
+        $this->validateMunicipalityForDepartment((int) $validated['department_id'], $validated['municipality']);
+        $validated = $this->applyDefaultCoordinates($validated);
+
         $farm = SolarFarm::create([
             'department_id' => $validated['department_id'],
             'name' => $validated['name'],
@@ -223,6 +232,8 @@ class SolarFarmController extends Controller
         return view('farms.edit', [
             'farm' => $farm,
             'departments' => Department::orderBy('name')->get(),
+            'municipalitiesByDepartment' => $this->municipalitiesByDepartment(),
+            'municipalityCoordinates' => $this->locationDefaultsByDepartment(),
         ]);
     }
 
@@ -239,6 +250,9 @@ class SolarFarmController extends Controller
             'status' => ['required', 'in:active,inactive,maintenance'],
             'notes' => ['nullable', 'string'],
         ]);
+
+        $this->validateMunicipalityForDepartment((int) $validated['department_id'], $validated['municipality']);
+        $validated = $this->applyDefaultCoordinates($validated);
 
         $farm->update($validated);
 
@@ -385,5 +399,134 @@ class SolarFarmController extends Controller
             'deviation_percent' => $deviation,
             'status' => 'active',
         ]);
+    }
+
+    private function municipalitiesByDepartment(): array
+    {
+        $catalog = $this->municipalityCatalog();
+
+        return Department::with('solarFarms:id,department_id,municipality')
+            ->orderBy('name')
+            ->get()
+            ->mapWithKeys(function (Department $department) use ($catalog) {
+                $municipalities = collect($catalog[$department->name] ?? [])
+                    ->merge($department->solarFarms->pluck('municipality'))
+                    ->filter()
+                    ->unique()
+                    ->sort()
+                    ->values()
+                    ->all();
+
+                return [$department->id => $municipalities];
+            })
+            ->all();
+    }
+
+    private function validateMunicipalityForDepartment(int $departmentId, string $municipality): void
+    {
+        $municipalities = collect($this->municipalitiesByDepartment()[$departmentId] ?? []);
+
+        if ($municipalities->isNotEmpty() && ! $municipalities->contains($municipality)) {
+            throw ValidationException::withMessages([
+                'municipality' => 'Selecciona un municipio valido para el departamento elegido.',
+            ]);
+        }
+    }
+
+    private function applyDefaultCoordinates(array $validated): array
+    {
+        $coordinates = $this->defaultCoordinatesForMunicipality(
+            (int) $validated['department_id'],
+            $validated['municipality']
+        );
+
+        if ($coordinates !== null) {
+            $validated['latitude'] = $coordinates['lat'];
+            $validated['longitude'] = $coordinates['lng'];
+        }
+
+        return $validated;
+    }
+
+    private function defaultCoordinatesForMunicipality(int $departmentId, string $municipality): ?array
+    {
+        return $this->locationDefaultsByDepartment()[$departmentId][$municipality] ?? null;
+    }
+
+    private function locationDefaultsByDepartment(): array
+    {
+        $catalog = $this->municipalityCatalog();
+        $specific = $this->specificMunicipalityCoordinates();
+
+        return Department::orderBy('name')->get()
+            ->mapWithKeys(function (Department $department) use ($catalog, $specific) {
+                $municipalities = collect($catalog[$department->name] ?? []);
+
+                $coordinates = $municipalities->mapWithKeys(function (string $municipality) use ($department, $specific) {
+                    $default = $specific[$department->name][$municipality] ?? [
+                        'lat' => (float) $department->latitude,
+                        'lng' => (float) $department->longitude,
+                    ];
+
+                    return [$municipality => $default];
+                })->all();
+
+                return [$department->id => $coordinates];
+            })
+            ->all();
+    }
+
+    private function specificMunicipalityCoordinates(): array
+    {
+        return [
+            'Escuintla' => [
+                'Santa Lucia Cotzumalguapa' => ['lat' => 14.3350, 'lng' => -91.0232],
+            ],
+            'Guatemala' => [
+                'Guatemala' => ['lat' => 14.6349, 'lng' => -90.5069],
+                'Mixco' => ['lat' => 14.6333, 'lng' => -90.6064],
+                'Villa Nueva' => ['lat' => 14.5269, 'lng' => -90.5875],
+            ],
+            'Izabal' => [
+                'Puerto Barrios' => ['lat' => 15.7322, 'lng' => -88.5945],
+            ],
+            'Quetzaltenango' => [
+                'Olintepeque' => ['lat' => 14.8870, 'lng' => -91.5132],
+            ],
+            'Solola' => [
+                'Panajachel' => ['lat' => 14.7400, 'lng' => -91.1590],
+            ],
+            'Zacapa' => [
+                'Rio Hondo' => ['lat' => 15.0410, 'lng' => -89.5852],
+            ],
+        ];
+    }
+
+    private function municipalityCatalog(): array
+    {
+        return [
+            'Alta Verapaz' => ['Cahabon', 'Chahal', 'Chisec', 'Coban', 'Fray Bartolome de las Casas', 'Lanquin', 'Panzos', 'Raxruha', 'San Cristobal Verapaz', 'San Juan Chamelco', 'San Pedro Carcha', 'Santa Catalina La Tinta', 'Santa Cruz Verapaz', 'Senahu', 'Tactic', 'Tamahu', 'Tucuru'],
+            'Baja Verapaz' => ['Cubulco', 'El Chol', 'Granados', 'Purulha', 'Rabinal', 'Salama', 'San Jeronimo', 'San Miguel Chicaj'],
+            'Chimaltenango' => ['Acatenango', 'Chimaltenango', 'El Tejar', 'Parramos', 'Patzicia', 'Patzun', 'Pochuta', 'San Andres Itzapa', 'San Jose Poaquil', 'San Juan Comalapa', 'San Martin Jilotepeque', 'Santa Apolonia', 'Santa Cruz Balanya', 'Tecpan Guatemala', 'Yepocapa', 'Zaragoza'],
+            'Chiquimula' => ['Camotan', 'Chiquimula', 'Concepcion Las Minas', 'Esquipulas', 'Ipala', 'Jocotan', 'Olopa', 'Quezaltepeque', 'San Jacinto', 'San Jose La Arada', 'San Juan Ermita'],
+            'El Progreso' => ['El Jicaro', 'Guastatoya', 'Morazan', 'San Agustin Acasaguastlan', 'San Antonio La Paz', 'San Cristobal Acasaguastlan', 'Sanarate', 'Sansare'],
+            'Escuintla' => ['Escuintla', 'Guanagazapa', 'Iztapa', 'La Democracia', 'La Gomera', 'Masagua', 'Nueva Concepcion', 'Palin', 'San Jose', 'San Vicente Pacaya', 'Santa Lucia Cotzumalguapa', 'Siquinala', 'Tiquisate'],
+            'Guatemala' => ['Amatitlan', 'Chinautla', 'Chuarrancho', 'Fraijanes', 'Guatemala', 'Mixco', 'Palencia', 'San Jose del Golfo', 'San Jose Pinula', 'San Juan Sacatepequez', 'San Miguel Petapa', 'San Pedro Ayampuc', 'San Pedro Sacatepequez', 'San Raymundo', 'Santa Catarina Pinula', 'Villa Canales', 'Villa Nueva'],
+            'Huehuetenango' => ['Aguacatan', 'Barillas', 'Chiantla', 'Colotenango', 'Concepcion Huista', 'Cuilco', 'Huehuetenango', 'Ixtahuacan', 'Jacaltenango', 'La Democracia', 'La Libertad', 'Malacatancito', 'Nenton', 'San Antonio Huista', 'San Gaspar Ixchil', 'San Juan Atitan', 'San Juan Ixcoy', 'San Mateo Ixtatan', 'San Miguel Acatan', 'San Pedro Necta', 'San Rafael La Independencia', 'San Rafael Petzal', 'San Sebastian Coatan', 'San Sebastian Huehuetenango', 'Santa Ana Huista', 'Santa Barbara', 'Santa Eulalia', 'Santiago Chimaltenango', 'Soloma', 'Tectitan', 'Todos Santos Cuchumatan', 'Union Cantinil'],
+            'Izabal' => ['El Estor', 'Livingston', 'Los Amates', 'Morales', 'Puerto Barrios'],
+            'Jalapa' => ['Jalapa', 'Mataquescuintla', 'Monjas', 'San Carlos Alzatate', 'San Luis Jilotepeque', 'San Manuel Chaparron', 'San Pedro Pinula'],
+            'Jutiapa' => ['Agua Blanca', 'Asuncion Mita', 'Atescatempa', 'Comapa', 'Conguaco', 'El Adelanto', 'El Progreso', 'Jalpatagua', 'Jerez', 'Jutiapa', 'Moyuta', 'Pasaco', 'Quesada', 'San Jose Acatempa', 'Santa Catarina Mita', 'Yupiltepeque', 'Zapotitlan'],
+            'Peten' => ['Dolores', 'El Chal', 'Flores', 'La Libertad', 'Las Cruces', 'Melchor de Mencos', 'Poptun', 'San Andres', 'San Benito', 'San Francisco', 'San Jose', 'San Luis', 'Santa Ana', 'Sayaxche'],
+            'Quetzaltenango' => ['Almolonga', 'Cabrican', 'Cajola', 'Cantel', 'Coatepeque', 'Colomba', 'Concepcion Chiquirichapa', 'El Palmar', 'Flores Costa Cuca', 'Genova', 'Huitan', 'La Esperanza', 'Olintepeque', 'Palestina de Los Altos', 'Quetzaltenango', 'Salcaja', 'San Carlos Sija', 'San Francisco La Union', 'San Juan Ostuncalco', 'San Martin Sacatepequez', 'San Mateo', 'San Miguel Siguila', 'Sibilia', 'Zunil'],
+            'Quiche' => ['Canilla', 'Chajul', 'Chicaman', 'Chiche', 'Chichicastenango', 'Chinique', 'Cunen', 'Ixcan', 'Joyabaj', 'Nebaj', 'Pachalum', 'Patzite', 'Sacapulas', 'San Andres Sajcabaja', 'San Antonio Ilotenango', 'San Bartolome Jocotenango', 'San Juan Cotzal', 'San Pedro Jocopilas', 'Santa Cruz del Quiche', 'Uspantan', 'Zacualpa'],
+            'Retalhuleu' => ['Champerico', 'El Asintal', 'Nuevo San Carlos', 'Retalhuleu', 'San Andres Villa Seca', 'San Felipe', 'San Martin Zapotitlan', 'San Sebastian', 'Santa Cruz Mulua'],
+            'Sacatepequez' => ['Alotenango', 'Antigua Guatemala', 'Ciudad Vieja', 'Jocotenango', 'Magdalena Milpas Altas', 'Pastores', 'San Antonio Aguas Calientes', 'San Bartolome Milpas Altas', 'San Lucas Sacatepequez', 'San Miguel Duenas', 'Santa Catarina Barahona', 'Santa Lucia Milpas Altas', 'Santa Maria de Jesus', 'Santiago Sacatepequez', 'Santo Domingo Xenacoj', 'Sumpango'],
+            'San Marcos' => ['Ayutla', 'Catarina', 'Comitancillo', 'Concepcion Tutuapa', 'El Quetzal', 'El Rodeo', 'El Tumbador', 'Esquipulas Palo Gordo', 'Ixchiguan', 'La Blanca', 'La Reforma', 'Malacatan', 'Nuevo Progreso', 'Ocos', 'Pajapita', 'Rio Blanco', 'San Antonio Sacatepequez', 'San Cristobal Cucho', 'San Jose Ojetenam', 'San Lorenzo', 'San Marcos', 'San Miguel Ixtahuacan', 'San Pablo', 'San Pedro Sacatepequez', 'San Rafael Pie de la Cuesta', 'Sibinal', 'Sipacapa', 'Tacana', 'Tajumulco', 'Tejutla'],
+            'Santa Rosa' => ['Barberena', 'Casillas', 'Chiquimulilla', 'Cuilapa', 'Guazacapan', 'Nueva Santa Rosa', 'Oratorio', 'Pueblo Nuevo Vinas', 'San Juan Tecuaco', 'San Rafael Las Flores', 'Santa Cruz Naranjo', 'Santa Maria Ixhuatan', 'Santa Rosa de Lima', 'Taxisco'],
+            'Solola' => ['Concepcion', 'Nahuala', 'Panajachel', 'San Andres Semetabaj', 'San Antonio Palopo', 'San Jose Chacaya', 'San Juan La Laguna', 'San Lucas Toliman', 'San Marcos La Laguna', 'San Pablo La Laguna', 'San Pedro La Laguna', 'Santa Catarina Ixtahuacan', 'Santa Catarina Palopo', 'Santa Clara La Laguna', 'Santa Cruz La Laguna', 'Santa Lucia Utatlan', 'Santa Maria Visitacion', 'Santiago Atitlan', 'Solola'],
+            'Suchitepequez' => ['Chicacao', 'Cuyotenango', 'Mazatenango', 'Patulul', 'Pueblo Nuevo', 'Rio Bravo', 'Samayac', 'San Antonio Suchitepequez', 'San Bernardino', 'San Francisco Zapotitlan', 'San Gabriel', 'San Jose El Idolo', 'San Juan Bautista', 'San Lorenzo', 'San Miguel Panan', 'San Pablo Jocopilas', 'Santa Barbara', 'Santo Domingo Suchitepequez', 'Santo Tomas La Union', 'Zunilito'],
+            'Totonicapan' => ['Momostenango', 'San Andres Xecul', 'San Bartolo', 'San Cristobal Totonicapan', 'San Francisco El Alto', 'Santa Lucia La Reforma', 'Santa Maria Chiquimula', 'Totonicapan'],
+            'Zacapa' => ['Cabanas', 'Estanzuela', 'Gualan', 'Huite', 'La Union', 'Rio Hondo', 'San Diego', 'Teculutan', 'Usumatlan', 'Zacapa'],
+        ];
     }
 }

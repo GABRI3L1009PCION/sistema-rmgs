@@ -7,25 +7,47 @@ use App\Models\Department;
 use App\Models\EnergyRecord;
 use App\Models\SolarFarm;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $farms = SolarFarm::with(['department', 'farmPanels.panelModel', 'energyRecords'])->get();
         $records = EnergyRecord::with('solarFarm.department')->get();
         $alerts = Alert::with('solarFarm.department')->where('status', 'active')->latest()->get();
         $departments = Department::with('solarFarms.energyRecords', 'solarFarms.farmPanels.panelModel')->get();
+        $availablePeriods = $this->availablePeriods($records);
+        $requestedPeriod = $request->query('period');
+        $selectedPeriod = $availablePeriods->contains($requestedPeriod)
+            ? $requestedPeriod
+            : $availablePeriods->first();
+        $periodRecords = $this->periodRecords($records, $selectedPeriod);
+        $previousPeriod = $this->previousPeriod($availablePeriods, $selectedPeriod);
+        $previousRecords = $this->periodRecords($records, $previousPeriod);
+        $periodStats = $this->nationalStats($farms, $periodRecords);
 
         return view('dashboard', [
-            'stats' => $this->nationalStats($farms, $records),
+            'stats' => $periodStats,
             'farms' => $farms,
+            'featuredFarms' => $this->topFarmsForPeriod($farms, $periodRecords),
             'records' => $records->sortByDesc('period'),
-            'alerts' => $alerts,
+            'alerts' => $this->periodAlerts($alerts, $selectedPeriod),
             'departmentReports' => $this->departmentReports($departments),
-            'generationSeries' => $this->generationSeries($records),
+            'generationSeries' => $this->generationSeries($records, $selectedPeriod),
             'mapFarms' => $this->mapFarms($farms),
+            'availablePeriods' => $availablePeriods->map(fn (string $period) => [
+                'value' => $period,
+                'label' => Carbon::createFromFormat('Y-m', $period)->translatedFormat('F Y'),
+            ]),
+            'selectedPeriod' => $selectedPeriod,
+            'trends' => [
+                'co2' => $this->percentageChange(
+                    $periodStats['co2_tons'],
+                    $this->nationalStats($farms, $previousRecords)['co2_tons']
+                ),
+            ],
         ]);
     }
 
@@ -40,6 +62,50 @@ class DashboardController extends Controller
                 Department::with('solarFarms.energyRecords', 'solarFarms.farmPanels.panelModel')->get()
             )->values(),
             'alerts' => Alert::with('solarFarm.department')->where('status', 'active')->get(),
+        ]);
+    }
+
+    public function periodStats(Request $request)
+    {
+        $farms = SolarFarm::with(['department', 'farmPanels.panelModel'])->get();
+        $records = EnergyRecord::with('solarFarm.department')->get();
+        $availablePeriods = $this->availablePeriods($records);
+        $requestedPeriod = $request->query('period');
+        $selectedPeriod = $availablePeriods->contains($requestedPeriod)
+            ? $requestedPeriod
+            : $availablePeriods->first();
+        $periodRecords = $this->periodRecords($records, $selectedPeriod);
+        $stats = $this->nationalStats($farms, $periodRecords);
+        $previousPeriod = $this->previousPeriod($availablePeriods, $selectedPeriod);
+        $previousStats = $this->nationalStats($farms, $this->periodRecords($records, $previousPeriod));
+        $dailyAverage = $stats['actual_kwh'] > 0 ? round($stats['actual_kwh'] / 30) : 0;
+        $alerts = Alert::with('solarFarm.department')->where('status', 'active')->latest()->get();
+
+        return response()->json([
+            'selected_period' => $selectedPeriod,
+            'stats' => [
+                'actual_kwh' => $stats['actual_kwh'],
+                'co2_tons' => $stats['co2_tons'],
+                'daily_average' => $dailyAverage,
+                'homes_equivalent' => round($stats['actual_kwh'] / 40),
+                'trees_equivalent' => round($stats['co2_tons'] * 34.53),
+            ],
+            'trends' => [
+                'co2' => $this->percentageChange($stats['co2_tons'], $previousStats['co2_tons']),
+            ],
+            'generation_series' => $this->generationSeries($records, $selectedPeriod),
+            'alerts' => $this->periodAlerts($alerts, $selectedPeriod)->map(fn (Alert $alert) => [
+                'farm' => $alert->solarFarm->name,
+                'period' => $alert->period->translatedFormat('M Y'),
+            ])->values(),
+            'top_farms' => $this->topFarmsForPeriod($farms, $periodRecords)->map(fn (array $farm) => [
+                'name' => $farm['name'],
+                'department' => $farm['department'],
+                'capacity_kw' => $farm['capacity_kw'],
+                'generation_kwh' => $farm['generation_kwh'],
+                'status' => $farm['status'],
+                'status_label' => $farm['status_label'],
+            ])->values(),
         ]);
     }
 
@@ -153,7 +219,7 @@ class DashboardController extends Controller
 
         return response()->streamDownload(function () use ($startYear, $baseGeneration) {
             $output = fopen('php://output', 'w');
-            fputcsv($output, ['Ano', 'Escenario conservador kWh', 'Escenario base kWh', 'Escenario optimista kWh']);
+            fputcsv($output, ['Año', 'Escenario conservador kWh', 'Escenario base kWh', 'Escenario optimista kWh']);
             foreach (range(0, 4) as $index) {
                 fputcsv($output, [$startYear + $index, round($baseGeneration * (1.03 ** $index), 2), round($baseGeneration * (1.08 ** $index), 2), round($baseGeneration * (1.12 ** $index), 2)]);
             }
@@ -198,6 +264,83 @@ class DashboardController extends Controller
         ];
     }
 
+    private function availablePeriods(Collection $records): Collection
+    {
+        return $records
+            ->pluck('period')
+            ->map(fn (Carbon $period) => $period->format('Y-m'))
+            ->unique()
+            ->sortDesc()
+            ->values();
+    }
+
+    private function periodRecords(Collection $records, ?string $selectedPeriod): Collection
+    {
+        if (! $selectedPeriod) {
+            return collect();
+        }
+
+        return $records->filter(fn (EnergyRecord $record) => $record->period->format('Y-m') === $selectedPeriod);
+    }
+
+    private function previousPeriod(Collection $availablePeriods, ?string $selectedPeriod): ?string
+    {
+        if (! $selectedPeriod) {
+            return null;
+        }
+
+        return $availablePeriods
+            ->filter(fn (string $period) => $period < $selectedPeriod)
+            ->sortDesc()
+            ->first();
+    }
+
+    private function percentageChange(float|int $current, float|int $previous): ?float
+    {
+        if ((float) $previous === 0.0) {
+            return null;
+        }
+
+        return round((($current - $previous) / $previous) * 100, 1);
+    }
+
+    private function periodAlerts(Collection $alerts, ?string $selectedPeriod): Collection
+    {
+        if (! $selectedPeriod) {
+            return collect();
+        }
+
+        return $alerts
+            ->filter(fn (Alert $alert) => $alert->period->format('Y-m') === $selectedPeriod)
+            ->take(2)
+            ->values();
+    }
+
+    private function topFarmsForPeriod(Collection $farms, Collection $periodRecords): Collection
+    {
+        $generationByFarm = $periodRecords
+            ->groupBy('solar_farm_id')
+            ->map(fn (Collection $records) => round($records->sum('actual_kwh'), 2))
+            ->sortDesc();
+        $farmsById = $farms->keyBy('id');
+
+        return $generationByFarm
+            ->take(3)
+            ->map(function (float $generation, int $farmId) use ($farmsById) {
+                $farm = $farmsById->get($farmId);
+
+                return [
+                    'name' => $farm->name,
+                    'department' => $farm->department->name,
+                    'capacity_kw' => round($farm->installedCapacityKw(), 1),
+                    'generation_kwh' => $generation,
+                    'status' => $farm->status,
+                    'status_label' => $farm->status === 'maintenance' ? 'Mantenimiento' : ($farm->status === 'active' ? 'Activa' : 'Inactiva'),
+                ];
+            })
+            ->values();
+    }
+
     private function departmentReports(Collection $departments): Collection
     {
         return $departments->map(function (Department $department) {
@@ -217,16 +360,23 @@ class DashboardController extends Controller
         })->sortByDesc('actual_kwh');
     }
 
-    private function generationSeries(Collection $records): array
+    private function generationSeries(Collection $records, ?string $selectedPeriod = null): array
     {
-        return $records
+        $series = $records
             ->groupBy(fn (EnergyRecord $record) => $record->period->format('Y-m'))
             ->sortKeys()
             ->map(fn (Collection $items) => [
                 'actual' => round($items->sum('actual_kwh'), 2),
                 'expected' => round($items->sum('expected_kwh'), 2),
-            ])
-            ->toArray();
+            ]);
+
+        if ($selectedPeriod) {
+            $series = $series
+                ->filter(fn (array $item, string $period) => $period <= $selectedPeriod)
+                ->take(-3);
+        }
+
+        return $series->toArray();
     }
 
     private function mapFarms(Collection $farms): array

@@ -28,9 +28,9 @@ docs/manual-usuario
 ## Regla de trabajo
 
 1. Crear o actualizar una rama de trabajo desde `develop`.
-2. Hacer commits pequenos y descriptivos.
+2. Hacer commits pequeños y descriptivos.
 3. Actualizar `CHANGELOG.md` con el cambio realizado.
-4. Actualizar `PROMPTS.md` cuando se use IA para analisis, diseno, codigo, pruebas o documentacion.
+4. Actualizar `PROMPTS.md` cuando se use IA para analisis, diseño, codigo, pruebas o documentacion.
 5. Probar con `php artisan test` antes de subir cambios.
 6. Subir la rama al remoto.
 7. Integrar la rama de trabajo a `develop` mediante Pull Request o merge revisado.
@@ -150,5 +150,5 @@ Plantilla sugerida:
 - Integrar avances solamente hacia `develop` hasta que el proyecto este terminado.
 - No borrar historial remoto sin acuerdo del equipo.
 - Revisar `git status` antes de cada commit y antes de cada push.
-- Mantener mensajes de commit en espanol, claros y en modo descriptivo.
+- Mantener mensajes de commit en español, claros y en modo descriptivo.
 - Agregar o actualizar el `.md` correspondiente en `docs/cambios/` para cada cambio solicitado.

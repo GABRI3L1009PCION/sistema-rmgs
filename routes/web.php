@@ -13,6 +13,7 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/periodo', [DashboardController::class, 'periodStats'])->name('dashboard.period');
     Route::post('/cerrar-sesion', [AuthController::class, 'logout'])->name('logout');
     Route::get('/granjas', [SolarFarmController::class, 'index'])->name('farms.index');
     Route::get('/granjas/nueva', [SolarFarmController::class, 'create'])->name('farms.create');

@@ -23,10 +23,11 @@
         .farms-content { min-height: 0; display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(330px, .75fr); gap: 10px; }
         .farms-list-card, .farm-map-card { min-height: 0; overflow: hidden; }
         .farms-list-card { display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; padding: 14px 16px 10px; }
-        .list-heading { margin-bottom: 9px; }
+        .list-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
+        .list-heading-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
         .list-heading h2 { font-size: 1.12rem; }
         .list-heading p { margin-top: 3px; }
-        .farm-filters { display: grid; grid-template-columns: 1fr 1fr 1.05fr; gap: 10px; margin-bottom: 10px; }
+        .farm-filters { display: grid; grid-template-columns: .95fr .95fr .85fr 1.05fr; gap: 10px; margin-bottom: 10px; }
         .farm-filters label { gap: 3px; font-size: .68rem; }
         .filter-box { position: relative; }
         .filter-box > svg { position: absolute; z-index: 1; left: 10px; top: 50%; width: 17px; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
@@ -89,9 +90,18 @@
 
         <section class="farms-content">
             <article class="card farms-list-card">
-                <header class="list-heading"><h2>Listado de granjas solares</h2><p class="muted"><span id="visible-farm-count">{{ $farms->count() }}</span> granjas registradas en el sistema</p></header>
+                <header class="list-heading">
+                    <div>
+                        <h2>Listado de granjas solares</h2>
+                        <p class="muted"><span id="visible-farm-count">{{ $farms->count() }}</span> granjas registradas en el sistema</p>
+                    </div>
+                    <div class="list-heading-actions">
+                        <a class="btn primary" href="{{ route('farms.create') }}"><i data-lucide="plus"></i>Nueva granja</a>
+                    </div>
+                </header>
                 <div class="farm-filters">
-                    <label>Departamento<span class="filter-box"><i data-lucide="map-pin"></i><select id="department-filter"><option value="">Todos los departamentos</option>@foreach ($departments as $department)<option value="{{ $department->name }}">{{ $department->name }}</option>@endforeach</select></span></label>
+                    <label>Departamento<span class="filter-box"><i data-lucide="map-pin"></i><select id="department-filter"><option value="">Todos los departamentos</option>@foreach ($departments as $department)<option value="{{ $department->name }}" data-department-id="{{ $department->id }}">{{ $department->name }}</option>@endforeach</select></span></label>
+                    <label>Municipio<span class="filter-box"><i data-lucide="map"></i><select id="municipality-filter"><option value="">Todos los municipios</option></select></span></label>
                     <label>Estado<span class="filter-box"><i data-lucide="circle"></i><select id="status-filter"><option value="">Todos los estados</option><option value="active">Activas</option><option value="maintenance">En mantenimiento</option><option value="inactive">Inactivas</option></select></span></label>
                     <label>Busqueda<span class="filter-box"><i data-lucide="search"></i><input id="farm-search" type="search" placeholder="Buscar por nombre..."></span></label>
                 </div>
@@ -101,7 +111,7 @@
                         <tbody id="farms-table-body">
                             @foreach ($farms as $farm)
                                 @php $panelCount = $farm->farmPanels->sum('quantity'); @endphp
-                                <tr data-farm-id="{{ $farm->id }}" data-name="{{ strtolower($farm->name) }}" data-department="{{ $farm->department->name }}" data-status="{{ $farm->status }}">
+                                <tr data-farm-id="{{ $farm->id }}" data-name="{{ strtolower($farm->name) }}" data-department="{{ $farm->department->name }}" data-municipality="{{ $farm->municipality }}" data-status="{{ $farm->status }}">
                                     <td><span class="farm-name"><img class="farm-thumb" src="{{ asset('images/dashboard-hero-guatemala.png') }}" alt=""><strong>{{ $farm->name }}</strong></span></td>
                                     <td>{{ $farm->department->name }}</td><td>{{ number_format($farm->installedCapacityKw(), 1) }}</td><td>{{ number_format($panelCount) }}</td>
                                     <td><span class="farm-status {{ $farm->status }}">{{ $farm->status === 'maintenance' ? 'En mantenimiento' : ($farm->status === 'active' ? 'Activa' : 'Inactiva') }}</span></td>
@@ -124,34 +134,93 @@
 
     <script>
         const farmData = @json($mapFarms);
+        const municipalitiesByDepartment = @json($municipalitiesByDepartment);
         const farmsMap = L.map('farms-map', { zoomControl: true }).setView([15.4, -90.3], 7);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap' }).addTo(farmsMap);
         const farmMarkers = new Map();
         farmData.forEach(farm => {
             const color = farm.status === 'maintenance' ? '#f2a900' : (farm.status === 'inactive' ? '#ef4444' : '#0aa574');
-            const marker = L.circleMarker([farm.lat, farm.lng], { radius: 8, color: '#fff', weight: 3, fillColor: color, fillOpacity: 1 }).addTo(farmsMap).bindPopup(`<strong>${farm.name}</strong><br>${farm.department}<br>${Number(farm.capacity_kw).toFixed(1)} kW`);
+            const marker = L.circleMarker([farm.lat, farm.lng], { radius: 8, color: '#fff', weight: 3, fillColor: color, fillOpacity: 1 }).addTo(farmsMap).bindPopup(`<strong>${farm.name}</strong><br>${farm.department} / ${farm.municipality}<br>${Number(farm.capacity_kw).toFixed(1)} kW`);
             farmMarkers.set(Number(farm.id), marker);
         });
         const rows = [...document.querySelectorAll('#farms-table-body tr')];
         const departmentFilter = document.getElementById('department-filter');
+        const municipalityFilter = document.getElementById('municipality-filter');
         const statusFilter = document.getElementById('status-filter');
         const farmSearch = document.getElementById('farm-search');
+
+        function refreshMunicipalityFilter() {
+            const selectedOption = departmentFilter.selectedOptions[0];
+            const departmentId = selectedOption?.dataset.departmentId;
+            const municipalities = departmentId ? (municipalitiesByDepartment[departmentId] || []) : [];
+            municipalityFilter.innerHTML = '<option value="">Todos los municipios</option>';
+            municipalities.forEach(municipality => {
+                const option = document.createElement('option');
+                option.value = municipality;
+                option.textContent = municipality;
+                municipalityFilter.appendChild(option);
+            });
+            municipalityFilter.disabled = municipalities.length === 0;
+        }
+
+        function syncMapMarkers(visibleIds) {
+            const visibleMarkers = [];
+            farmMarkers.forEach((marker, farmId) => {
+                if (visibleIds.has(farmId)) {
+                    if (!farmsMap.hasLayer(marker)) marker.addTo(farmsMap);
+                    visibleMarkers.push(marker);
+                    return;
+                }
+
+                if (farmsMap.hasLayer(marker)) farmsMap.removeLayer(marker);
+            });
+
+            if (visibleMarkers.length > 0) {
+                const bounds = L.featureGroup(visibleMarkers).getBounds().pad(0.2);
+                farmsMap.fitBounds(bounds, { maxZoom: 11, animate: true });
+                return;
+            }
+
+            farmsMap.setView([15.4, -90.3], 7);
+        }
+
         function filterFarms() {
             const query = farmSearch.value.trim().toLowerCase();
             let visible = 0;
+            const visibleIds = new Set();
             rows.forEach(row => {
-                const show = (!departmentFilter.value || row.dataset.department === departmentFilter.value) && (!statusFilter.value || row.dataset.status === statusFilter.value) && (!query || row.dataset.name.includes(query));
+                const show = (!departmentFilter.value || row.dataset.department === departmentFilter.value)
+                    && (!municipalityFilter.value || row.dataset.municipality === municipalityFilter.value)
+                    && (!statusFilter.value || row.dataset.status === statusFilter.value)
+                    && (!query || row.dataset.name.includes(query));
                 row.hidden = !show;
-                if (show) visible++;
+                if (show) {
+                    visible++;
+                    visibleIds.add(Number(row.dataset.farmId));
+                }
             });
             document.getElementById('visible-farm-count').textContent = visible;
             document.getElementById('footer-farm-count').textContent = visible;
+            syncMapMarkers(visibleIds);
         }
-        [departmentFilter, statusFilter, farmSearch].forEach(control => control.addEventListener('input', filterFarms));
+        departmentFilter.addEventListener('input', () => {
+            refreshMunicipalityFilter();
+            filterFarms();
+        });
+        [municipalityFilter, statusFilter, farmSearch].forEach(control => control.addEventListener('input', filterFarms));
         document.querySelectorAll('[data-focus-farm]').forEach(button => button.addEventListener('click', () => {
             const marker = farmMarkers.get(Number(button.dataset.focusFarm));
-            if (marker) { farmsMap.setView(marker.getLatLng(), 11); marker.openPopup(); }
+            if (marker) {
+                if (!farmsMap.hasLayer(marker)) marker.addTo(farmsMap);
+                farmsMap.setView(marker.getLatLng(), 11);
+                marker.openPopup();
+            }
         }));
-        window.setTimeout(() => farmsMap.invalidateSize(), 100);
+        refreshMunicipalityFilter();
+        filterFarms();
+        window.setTimeout(() => {
+            farmsMap.invalidateSize();
+            filterFarms();
+        }, 100);
     </script>
 @endsection

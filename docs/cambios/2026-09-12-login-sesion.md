@@ -16,7 +16,7 @@ El sistema administra datos de granjas solares, paneles, generacion, alertas y r
 - Se dejaron las rutas `/api/*` sin login para conservar la consulta tecnica de endpoints.
 - Se agrego un usuario demo desde el seeder:
   - Correo: `admin@rmgs.test`
-  - Contrasena: `password`
+  - Contraseña: `password`
 - El layout ahora muestra el nombre del usuario autenticado.
 - Se actualizaron pruebas para validar redireccion a login, inicio de sesion y cierre de sesion.
 - Se actualizo el README con credenciales y flujo inicial.

@@ -6,9 +6,26 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 
 ### Cambiado
 
+- Dashboard reorganizado para aprovechar mejor el espacio: hero mas expresivo, filtros/contexto, KPIs amplios, resumen nacional y secciones inferiores.
+- Dashboard compactado despues del rediseño para evitar scroll vertical por crecimiento excesivo de sus secciones.
+- Dashboard corregido para retirar filtro no funcional, mejorar lectura del titulo, centrar iconos de KPIs y evitar cortes en la parte inferior.
+- Dashboard refinado para reducir el espacio de grafica/resumen y estabilizar el centrado de iconos KPI.
+- Dashboard compactado nuevamente para reducir tamaños generales y mantener el titulo principal en una sola linea en escritorio.
+- Dashboard corregido para que las reglas de texto no desplacen los iconos dentro de las tarjetas KPI.
+- Textos visibles y documentacion corregidos para usar la letra `ñ` donde corresponde.
+- Dashboard ajustado para que la grafica y el resumen nacional ocupen menos espacio vertical.
+- Header reforzado para permanecer por encima del contenido en todas las vistas.
+- Dashboard rebalanceado: hero mas compacto y grafica/resumen con un poco mas de altura.
+- Selector de periodo del dashboard convertido en filtro funcional sobre los datos mensuales.
+- Filtro de periodo del dashboard actualizado para refrescar grafica y resumen sin recargar la pagina.
+- Dashboard completado para que tendencia CO2, alertas recientes y top de granjas respondan al periodo seleccionado.
+- Vista de granjas actualizada con acceso visible para registrar una nueva granja solar.
+- Formulario de nueva granja actualizado para sugerir generacion esperada mensual a partir de capacidad instalada.
+- Granjas solares actualizado para sincronizar filtros de departamento/municipio con tabla y mapa, y validar municipios por departamento.
+- Notificaciones del sistema rediseñadas como toasts flotantes con cierre automatico.
 - Modo oscuro corregido en reportes, alertas, proyecciones y mapa para evitar tarjetas blancas, tablas claras y graficas con contraste incorrecto.
-- Paleta visual global redisenada con superficies mas calidas, mejor contraste y soporte de modo oscuro.
-- Menu de usuario del header redisenado como dropdown compacto con cierre de sesion.
+- Paleta visual global rediseñada con superficies mas calidas, mejor contraste y soporte de modo oscuro.
+- Menu de usuario del header rediseñado como dropdown compacto con cierre de sesion.
 - Cambio de tema movido al header con animacion visual entre modo claro y modo oscuro.
 - Flujo principal protegido con autenticacion: al entrar al sistema primero se muestra el login.
 - Apartado de configuracion/parametros retirado de la interfaz para mantener el sistema enfocado en las funciones centrales del reto.
@@ -36,6 +53,10 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 
 ### Agregado
 
+- Boton para mostrar u ocultar la contraseña en el login.
+- Documento `docs/cambios/2026-09-12-acceso-nueva-granja.md` con el detalle del acceso visible al registro de granjas.
+- Documento `docs/cambios/2026-09-12-generacion-esperada-automatica.md` con el detalle del calculo sugerido de generacion esperada.
+- Documento `docs/cambios/2026-09-12-granjas-filtros-municipios.md` con el detalle de filtros y municipios dependientes.
 - Alternador de tema claro/oscuro persistente en el navegador.
 - Pantalla de login, rutas de sesion y usuario demo sembrado para acceder al sistema.
 - Pruebas de autenticacion para validar carga del login, acceso con usuario demo y cierre de sesion.
