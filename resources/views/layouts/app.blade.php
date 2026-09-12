@@ -82,8 +82,11 @@
             border: 1px solid rgba(220, 232, 246, .72);
         }
         .footer-card strong { display: block; margin-top: 8px; color: var(--ink); line-height: 1.2; }
-        .main { min-width: 0; padding: 10px 18px 16px; overflow-x: hidden; }
-        .topbar { display: grid; grid-template-columns: minmax(260px, 1fr) max-content max-content; align-items: center; gap: 12px; margin: 0 0 10px; }
+        .main { min-width: 0; padding: 14px 18px 18px; overflow-x: hidden; }
+        .topbar { display: grid; grid-template-columns: minmax(260px, 1fr) max-content; align-items: center; gap: 12px; margin: 0 0 12px; }
+        .section-heading { display: grid; gap: 3px; min-width: 0; }
+        .section-heading strong { font-size: 1.05rem; line-height: 1.1; }
+        .section-heading span { color: var(--muted); font-size: .78rem; }
         .search-box, .month-picker, .user-menu {
             min-height: 42px;
             border: 1px solid var(--line);
@@ -141,8 +144,7 @@
         @media (max-width: 1450px) {
             .app-shell { grid-template-columns: 228px minmax(0, 1fr); }
             .main { padding: 10px 14px 14px; }
-            .topbar { grid-template-columns: minmax(220px, 1fr) max-content max-content; gap: 12px; }
-            .user-menu span:not(.avatar) { display: none; }
+            .topbar { grid-template-columns: minmax(220px, 1fr) max-content; gap: 12px; }
             .side-link { min-height: 44px; }
         }
         @media (max-width: 900px) {
@@ -183,13 +185,39 @@
         </aside>
 
         <main class="main">
+            @php
+                $sectionTitle = match (true) {
+                    request()->routeIs('dashboard') => 'Dashboard nacional',
+                    request()->routeIs('farms.*') => 'Granjas solares',
+                    request()->routeIs('panels.*') => 'Paneles solares',
+                    request()->routeIs('records.*') => 'Generacion',
+                    request()->routeIs('reports.*') => 'Reportes',
+                    request()->routeIs('alerts.*') => 'Alertas',
+                    request()->routeIs('projections.*') => 'Proyecciones',
+                    request()->routeIs('map.*') => 'Mapa nacional',
+                    request()->routeIs('settings.*') => 'Configuracion',
+                    default => 'Sistema RMGS',
+                };
+                $sectionCaption = match (true) {
+                    request()->routeIs('dashboard') => 'Indicadores nacionales y estado general del sistema.',
+                    request()->routeIs('farms.*') => 'Registro, ubicacion y operacion de granjas solares.',
+                    request()->routeIs('panels.*') => 'Catalogo y asignacion de paneles instalados.',
+                    request()->routeIs('records.*') => 'Lecturas mensuales reales contra generacion esperada.',
+                    request()->routeIs('reports.*') => 'Resumenes exportables para analisis y presentacion.',
+                    request()->routeIs('alerts.*') => 'Desviaciones de rendimiento que requieren revision.',
+                    request()->routeIs('projections.*') => 'Escenarios futuros calculados desde el historial.',
+                    request()->routeIs('map.*') => 'Distribucion geografica de granjas solares.',
+                    request()->routeIs('settings.*') => 'Parametros operativos del sistema.',
+                    default => 'Registro y Monitoreo de Generacion Solar Guatemala.',
+                };
+            @endphp
+
             <header class="topbar">
-                <label class="search-box" aria-label="Buscar">
-                    <i data-lucide="search"></i>
-                    <input type="search" placeholder="Buscar granjas, paneles, departamentos...">
-                </label>
+                <div class="section-heading">
+                    <strong>{{ $sectionTitle }}</strong>
+                    <span>{{ $sectionCaption }}</span>
+                </div>
                 <div class="nav">
-                    <span class="month-picker"><i data-lucide="calendar-days"></i>{{ request()->routeIs('projections.*') ? '2026 - 2030' : 'Septiembre 2026' }} <i data-lucide="chevron-down"></i></span>
                     @if (request()->routeIs('panels.*'))
                         <a class="btn primary" href="{{ route('panels.create') }}"><i data-lucide="plus"></i>Nuevo panel</a>
                     @elseif (request()->routeIs('records.create') || request()->routeIs('records.edit'))
@@ -207,11 +235,6 @@
                     @else
                         <a class="btn primary" href="{{ route('farms.create') }}"><i data-lucide="plus"></i>Nueva granja</a>
                     @endif
-                </div>
-                <div class="user-menu">
-                    <span class="avatar"><i data-lucide="user"></i></span>
-                    <span>Gabriel Admin</span>
-                    <i data-lucide="chevron-down"></i>
                 </div>
             </header>
 

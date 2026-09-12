@@ -91,14 +91,14 @@
                 <h1>Paneles solares</h1>
                 <p class="subtitle">Tecnologia que impulsa un Guatemala mas limpio y sostenible.</p>
             </div>
-            <div class="hero-note"><i data-lucide="map-pin"></i><span>Guatemala, un pais con mas energia limpia</span></div>
+            <div class="hero-note"><i data-lucide="grid-2x2"></i><span>Catalogo tecnico y disponibilidad instalada</span></div>
         </section>
 
         <section class="grid panel-kpis">
-            <article class="card panel-kpi"><span class="panel-kpi-icon"><i data-lucide="grid-2x2"></i></span><div><p class="panel-kpi-label">Modelos de paneles</p><p class="panel-kpi-value">{{ number_format($stats['models']) }}</p><p class="panel-kpi-trend">+13% <span>vs. mes anterior</span></p></div></article>
-            <article class="card panel-kpi"><span class="panel-kpi-icon green"><i data-lucide="layers-3"></i></span><div><p class="panel-kpi-label">Total de paneles instalados</p><p class="panel-kpi-value">{{ number_format($stats['panels']) }}</p><p class="panel-kpi-trend">+12% <span>vs. mes anterior</span></p></div></article>
-            <article class="card panel-kpi"><span class="panel-kpi-icon"><i data-lucide="zap"></i></span><div><p class="panel-kpi-label">Potencia total instalada</p><p class="panel-kpi-value">{{ number_format($stats['capacity_kw'], 1) }} kW</p><p class="panel-kpi-trend">+8% <span>vs. mes anterior</span></p></div></article>
-            <article class="card panel-kpi"><span class="panel-kpi-icon green"><i data-lucide="leaf"></i></span><div><p class="panel-kpi-label">Granjas con paneles</p><p class="panel-kpi-value">{{ number_format($stats['farms']) }}</p><p class="panel-kpi-trend">+0% <span>vs. mes anterior</span></p></div></article>
+            <article class="card panel-kpi"><span class="panel-kpi-icon"><i data-lucide="grid-2x2"></i></span><div><p class="panel-kpi-label">Modelos de paneles</p><p class="panel-kpi-value">{{ number_format($stats['models']) }}</p><p class="panel-kpi-trend">Catalogados</p></div></article>
+            <article class="card panel-kpi"><span class="panel-kpi-icon green"><i data-lucide="layers-3"></i></span><div><p class="panel-kpi-label">Total de paneles instalados</p><p class="panel-kpi-value">{{ number_format($stats['panels']) }}</p><p class="panel-kpi-trend">Asignados a granjas</p></div></article>
+            <article class="card panel-kpi"><span class="panel-kpi-icon"><i data-lucide="zap"></i></span><div><p class="panel-kpi-label">Potencia total instalada</p><p class="panel-kpi-value">{{ number_format($stats['capacity_kw'], 1) }} kW</p><p class="panel-kpi-trend">Calculada por modelo</p></div></article>
+            <article class="card panel-kpi"><span class="panel-kpi-icon green"><i data-lucide="landmark"></i></span><div><p class="panel-kpi-label">Granjas con paneles</p><p class="panel-kpi-value">{{ number_format($stats['farms']) }}</p><p class="panel-kpi-trend">En operacion tecnica</p></div></article>
         </section>
 
         <section class="card panel-filters">

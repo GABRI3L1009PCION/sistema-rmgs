@@ -77,14 +77,14 @@
                 <h1>Granjas solares</h1>
                 <p class="subtitle">Gestiona y consulta todas las granjas solares registradas en Guatemala.</p>
             </div>
-            <div class="hero-note"><i data-lucide="map-pin"></i><span>Energia limpia para un mejor manana</span></div>
+            <div class="hero-note"><i data-lucide="map-pin"></i><span>Ubicaciones y operacion por departamento</span></div>
         </section>
 
         <section class="grid farm-kpis">
-            <article class="card farm-kpi"><span class="farm-kpi-icon green"><i data-lucide="landmark"></i></span><div><p class="farm-kpi-label">Total de granjas</p><p class="farm-kpi-value">{{ number_format($stats['farms']) }}</p><p class="farm-kpi-trend">+20% <span>vs. mes anterior</span></p></div></article>
-            <article class="card farm-kpi"><span class="farm-kpi-icon"><i data-lucide="zap"></i></span><div><p class="farm-kpi-label">Capacidad total instalada</p><p class="farm-kpi-value">{{ number_format($stats['capacity_kw'], 1) }} kW</p><p class="farm-kpi-trend">+8% <span>vs. mes anterior</span></p></div></article>
-            <article class="card farm-kpi"><span class="farm-kpi-icon"><i data-lucide="grid-2x2"></i></span><div><p class="farm-kpi-label">Total de paneles</p><p class="farm-kpi-value">{{ number_format($stats['panels']) }}</p><p class="farm-kpi-trend">+12% <span>vs. mes anterior</span></p></div></article>
-            <article class="card farm-kpi"><span class="farm-kpi-icon green"><i data-lucide="leaf"></i></span><div><p class="farm-kpi-label">CO2 evitado (estimado)</p><p class="farm-kpi-value">{{ number_format($stats['co2_tons'], 1) }} t</p><p class="farm-kpi-trend">+14% <span>vs. mes anterior</span></p></div></article>
+            <article class="card farm-kpi"><span class="farm-kpi-icon green"><i data-lucide="landmark"></i></span><div><p class="farm-kpi-label">Total de granjas</p><p class="farm-kpi-value">{{ number_format($stats['farms']) }}</p><p class="farm-kpi-trend">Registro nacional</p></div></article>
+            <article class="card farm-kpi"><span class="farm-kpi-icon"><i data-lucide="zap"></i></span><div><p class="farm-kpi-label">Capacidad total instalada</p><p class="farm-kpi-value">{{ number_format($stats['capacity_kw'], 1) }} kW</p><p class="farm-kpi-trend">Suma de paneles</p></div></article>
+            <article class="card farm-kpi"><span class="farm-kpi-icon"><i data-lucide="grid-2x2"></i></span><div><p class="farm-kpi-label">Total de paneles</p><p class="farm-kpi-value">{{ number_format($stats['panels']) }}</p><p class="farm-kpi-trend">Instalados</p></div></article>
+            <article class="card farm-kpi"><span class="farm-kpi-icon green"><i data-lucide="leaf"></i></span><div><p class="farm-kpi-label">CO2 evitado (estimado)</p><p class="farm-kpi-value">{{ number_format($stats['co2_tons'], 1) }} t</p><p class="farm-kpi-trend">Factor 0.40 kg/kWh</p></div></article>
         </section>
 
         <section class="farms-content">

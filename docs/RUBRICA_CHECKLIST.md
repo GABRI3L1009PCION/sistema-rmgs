@@ -23,6 +23,7 @@
 - [x] Dashboard con KPIs claros.
 - [x] Mapa interactivo.
 - [x] Grafica real vs esperada.
+- [x] Limpieza visual de vistas para reducir elementos decorativos o no funcionales.
 - [ ] Revision visual en pantalla de presentacion.
 
 ## Funcionalidad y requerimientos

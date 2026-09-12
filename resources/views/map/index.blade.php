@@ -18,7 +18,7 @@
     </style>
 
     <div class="map-screen">
-        <section class="map-hero"><div><p class="eyebrow">RMGS - Registro y Monitoreo de Generacion Solar Guatemala</p><h1>Ver mapa</h1><p class="subtitle">Explora la distribucion de las granjas solares en Guatemala.</p></div><div class="hero-note"><i data-lucide="map-pin"></i><span>Guatemala, un pais con mas energia limpia</span></div></section>
+        <section class="map-hero"><div><p class="eyebrow">Cobertura geografica</p><h1>Mapa nacional</h1><p class="subtitle">Filtra por departamento y revisa capacidad, paneles e impacto ambiental.</p></div><div class="hero-note"><i data-lucide="map-pin"></i><span>Marcadores por estado operativo</span></div></section>
         <section class="map-toolbar"><label>Selecciona un departamento<span class="map-select-box"><i data-lucide="map-pin"></i><select id="map-department-filter"><option value="">Todos los departamentos</option>@foreach($departments as $department)<option value="{{ $department->name }}">{{ $department->name }}</option>@endforeach</select></span></label><div class="map-help"><i data-lucide="info"></i><p><strong>Selecciona un departamento para explorar sus granjas solares.</strong>Puedes hacer clic en los marcadores para ver mas informacion.</p></div></section>
         <section class="map-content">
             <article class="card map-card"><div id="national-map"></div><div class="map-legend"><span><i class="legend-dot"></i>Granja operativa</span><span><i class="legend-dot maintenance"></i>En mantenimiento</span><span><i class="legend-dot inactive"></i>Inactiva</span></div></article>
