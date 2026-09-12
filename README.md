@@ -59,6 +59,13 @@ Abrir:
 http://127.0.0.1:8000
 ```
 
+El sistema inicia en la pantalla de login. Usuario demo:
+
+```text
+Correo: admin@rmgs.test
+Contrasena: password
+```
+
 ## API REST
 
 - `GET /api/docs`
@@ -94,13 +101,14 @@ Cobertura actual:
 
 ## Manual breve de usuario
 
-1. Entrar al dashboard en `/` para revisar indicadores nacionales, mapa, ranking por departamento, alertas y proyecciones.
-2. Usar `Nueva granja` para registrar una granja solar, asociar paneles y guardar la generacion inicial.
-3. Usar `Editar` en la tabla de granjas para actualizar ubicacion, familias beneficiadas o estado operativo.
-4. Usar `Desactivar` para marcar una granja como inactiva sin eliminar su historial.
-5. Usar `Nueva generacion` para registrar datos mensuales de generacion real y esperada.
-6. Usar `Editar` o `Eliminar` en el historial de generacion para corregir registros historicos.
-7. Consultar `/api/docs` para ver la documentacion minima de endpoints disponibles.
+1. Entrar a `/login` e iniciar sesion con una cuenta autorizada.
+2. Revisar el dashboard en `/` para consultar indicadores nacionales, mapa, ranking por departamento, alertas y proyecciones.
+3. Usar `Nueva granja` para registrar una granja solar, asociar paneles y guardar la generacion inicial.
+4. Usar `Editar` en la tabla de granjas para actualizar ubicacion, familias beneficiadas o estado operativo.
+5. Usar `Desactivar` para marcar una granja como inactiva sin eliminar su historial.
+6. Usar `Nueva generacion` para registrar datos mensuales de generacion real y esperada.
+7. Usar `Editar` o `Eliminar` en el historial de generacion para corregir registros historicos.
+8. Consultar `/api/docs` para ver la documentacion minima de endpoints disponibles.
 
 ## Diagrama de base de datos
 

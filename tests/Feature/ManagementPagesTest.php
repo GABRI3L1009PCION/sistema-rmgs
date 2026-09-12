@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\PanelModel;
 use App\Models\SolarFarm;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,6 +17,7 @@ class ManagementPagesTest extends TestCase
         parent::setUp();
 
         $this->seed();
+        $this->actingAs(User::firstOrFail());
     }
 
     public function test_farm_detail_page_loads(): void

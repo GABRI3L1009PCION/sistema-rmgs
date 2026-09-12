@@ -185,37 +185,6 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function settings(Request $request)
-    {
-        return view('settings.index', ['settings' => array_merge([
-            'organization' => 'RMGS - Registro y Monitoreo de Generacion Solar Guatemala',
-            'email' => 'info@rmguatemala.gob.gt', 'phone' => '+502 2310-0000',
-            'address' => 'Ciudad de Guatemala, Guatemala', 'low_generation' => 80,
-            'offline_minutes' => 30, 'panel_temperature' => 75, 'session_minutes' => 60,
-            'email_notifications' => true, 'push_notifications' => true,
-            'weekly_reports' => true, 'critical_alerts' => true, 'activity_log' => true,
-            'theme' => 'light', 'color' => 'green',
-        ], $request->session()->get('settings', []))]);
-    }
-
-    public function updateSettings(Request $request)
-    {
-        $settings = $request->validate([
-            'organization' => ['required', 'string', 'max:255'], 'email' => ['required', 'email'],
-            'phone' => ['nullable', 'string', 'max:50'], 'address' => ['nullable', 'string', 'max:255'],
-            'low_generation' => ['required', 'integer', 'between:1,100'],
-            'offline_minutes' => ['required', 'integer', 'min:1'], 'panel_temperature' => ['required', 'integer', 'between:1,150'],
-            'session_minutes' => ['required', 'integer', 'min:5'], 'theme' => ['required', 'in:light,dark,auto'],
-            'color' => ['required', 'in:green,blue,cyan,purple,orange,red'],
-        ]);
-        foreach (['email_notifications', 'push_notifications', 'weekly_reports', 'critical_alerts', 'activity_log'] as $key) {
-            $settings[$key] = $request->boolean($key);
-        }
-        $request->session()->put('settings', $settings);
-
-        return redirect()->route('settings.index')->with('status', 'Configuracion guardada correctamente.');
-    }
-
     private function nationalStats(Collection $farms, Collection $records): array
     {
         return [
