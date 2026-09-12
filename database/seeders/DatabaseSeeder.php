@@ -7,9 +7,11 @@ use App\Models\Department;
 use App\Models\EnergyRecord;
 use App\Models\PanelModel;
 use App\Models\SolarFarm;
+use App\Models\User;
 use App\Services\SolarMetricsService;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
@@ -21,6 +23,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        User::updateOrCreate(
+            ['email' => 'admin@rmgs.test'],
+            [
+                'name' => 'Gabriel Admin',
+                'password' => Hash::make('password'),
+            ]
+        );
+
         $departments = [
             ['Alta Verapaz', 15.5943, -90.1495], ['Baja Verapaz', 15.1020, -90.3147],
             ['Chimaltenango', 14.6611, -90.8194], ['Chiquimula', 14.7972, -89.5448],

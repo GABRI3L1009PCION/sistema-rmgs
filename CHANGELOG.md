@@ -6,12 +6,19 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 
 ### Cambiado
 
+- Modo oscuro corregido en reportes, alertas, proyecciones y mapa para evitar tarjetas blancas, tablas claras y graficas con contraste incorrecto.
+- Paleta visual global redisenada con superficies mas calidas, mejor contraste y soporte de modo oscuro.
+- Menu de usuario del header redisenado como dropdown compacto con cierre de sesion.
+- Cambio de tema movido al header con animacion visual entre modo claro y modo oscuro.
+- Flujo principal protegido con autenticacion: al entrar al sistema primero se muestra el login.
+- Apartado de configuracion/parametros retirado de la interfaz para mantener el sistema enfocado en las funciones centrales del reto.
+- Paleta global suavizada para una apariencia mas limpia y menos cargada de azul palido.
 - Vista dashboard ajustada para funcionar como resumen informativo sin acciones de creacion, con hero a ancho completo y KPIs separados.
 - Barra global de busqueda, periodo y acciones retirada del layout principal porque cada modulo cuenta con filtros propios.
 - Menu lateral actualizado para poder ocultarse y mostrarse, conservando la preferencia en el navegador.
 - Dashboard compactado para verse completo en escritorio sin desplazamiento vertical, con resumen ejecutivo de granjas y alertas.
 - Limpieza visual de pantallas principales para diferenciar mejor dashboard, generacion, reportes, mapa, alertas, paneles y configuracion.
-- Barra superior conservada con buscador, periodo, usuario y acciones contextuales para futura funcionalidad.
+- Barra superior simplificada para mostrar usuario y control de menu, retirando controles duplicados.
 - Dashboard reorganizado como vista de monitoreo nacional con KPIs reales, grafica, ranking y alertas.
 - Pantalla de generacion reorganizada como vista historica con filtros, graficas, tabla completa y acciones.
 - Paneles reorganizado como catalogo tecnico con filtros, lista y detalle lateral, diferenciandolo del dashboard.
@@ -29,6 +36,9 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 
 ### Agregado
 
+- Alternador de tema claro/oscuro persistente en el navegador.
+- Pantalla de login, rutas de sesion y usuario demo sembrado para acceder al sistema.
+- Pruebas de autenticacion para validar carga del login, acceso con usuario demo y cierre de sesion.
 - Vista de detalle por granja solar con datos generales, KPIs, paneles instalados, historial de generacion y alertas.
 - Administracion de paneles instalados por granja: agregar, actualizar cantidad y retirar paneles.
 - Pantalla para editar modelos de paneles solares.
@@ -38,6 +48,7 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 - Documento `docs/cambios/2026-09-11-cierre-crud-paneles-granjas.md` con el detalle del cierre funcional.
 - Documento `docs/cambios/2026-09-11-limpieza-visual-vistas.md` con el detalle del rediseño visual.
 - Documento `docs/cambios/2026-09-11-menu-plegable-dashboard-compacto.md` con el detalle del menu plegable y dashboard compacto.
+- Documento `docs/cambios/2026-09-12-retiro-parametros-sistema.md` con el detalle del retiro del apartado de parametros.
 - Pantalla para editar granjas solares.
 - Accion para desactivar granjas solares sin borrar su historial.
 - Formulario para crear registros historicos de generacion mensual.
