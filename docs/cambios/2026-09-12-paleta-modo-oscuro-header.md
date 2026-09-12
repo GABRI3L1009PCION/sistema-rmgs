@@ -16,7 +16,7 @@ Las pantallas estaban usando demasiadas superficies blancas y el menu de usuario
 - Se agrego un boton de cambio de tema dentro del menu de usuario.
 - Se movio el cambio de tema al header como accion rapida junto al usuario.
 - Se agrego animacion de transicion al cambiar entre modo claro y modo oscuro.
-- Se redisenio el dropdown del usuario para que sea mas compacto.
+- Se rediseño el dropdown del usuario para que sea mas compacto.
 - El boton de cerrar sesion quedo dentro del dropdown del usuario.
 - Se agregaron overrides globales para cards, tablas, inputs, filas, alertas y mapas en modo oscuro.
 

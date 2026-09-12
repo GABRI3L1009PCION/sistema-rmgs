@@ -10,7 +10,7 @@
 
 ## Uso de Inteligencia Artificial
 
-- [x] Uso de agente de IA para analisis, diseno, codigo y documentacion.
+- [x] Uso de agente de IA para analisis, diseño, codigo y documentacion.
 - [x] Archivo `PROMPTS.md` con evidencia.
 - [x] Desarrollo incremental con commits.
 - [x] Flujo Git documentado para evidenciar trabajo incremental.

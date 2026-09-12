@@ -3,7 +3,7 @@
 @section('content')
     <section class="card">
         <h2>Editar generacion mensual</h2>
-        <p class="muted">Al actualizar el registro se recalcula CO2 con factor 0.40 y se vuelve a evaluar la alerta de desempeno.</p>
+        <p class="muted">Al actualizar el registro se recalcula CO2 con factor 0.40 y se vuelve a evaluar la alerta de desempeño.</p>
 
         <form method="post" action="{{ route('records.update', $record) }}" class="section">
             @csrf

@@ -17,7 +17,7 @@ El reto pide una aplicacion Laravel para registro y monitoreo de generacion sola
 ## Modelo de datos
 
 ```text
-Disena un modelo relacional para departamentos, granjas solares, modelos de paneles, paneles por granja, registros de generacion y alertas. Incluye reglas para capacidad instalada, CO2 evitado y desviacion de desempeno.
+Diseña un modelo relacional para departamentos, granjas solares, modelos de paneles, paneles por granja, registros de generacion y alertas. Incluye reglas para capacidad instalada, CO2 evitado y desviacion de desempeño.
 ```
 
 ## Implementacion

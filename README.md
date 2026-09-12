@@ -4,7 +4,7 @@ Sistema de Registro y Monitoreo de Generacion Solar en Guatemala.
 
 ## Objetivo
 
-Gestionar granjas solares por departamento, registrar paneles instalados, medir generacion real y esperada, calcular impacto ambiental, mostrar indicadores nacionales y detectar alertas de bajo desempeno.
+Gestionar granjas solares por departamento, registrar paneles instalados, medir generacion real y esperada, calcular impacto ambiental, mostrar indicadores nacionales y detectar alertas de bajo desempeño.
 
 ## Funcionalidades implementadas
 
@@ -63,7 +63,7 @@ El sistema inicia en la pantalla de login. Usuario demo:
 
 ```text
 Correo: admin@rmgs.test
-Contrasena: password
+Contraseña: password
 ```
 
 ## API REST
@@ -171,4 +171,4 @@ erDiagram
 
 ## Uso de IA
 
-Se utilizo IA para interpretar los requerimientos, priorizar el MVP, disenar la estructura de datos, generar codigo inicial, revisar errores y crear documentacion. Los prompts principales deben guardarse en `PROMPTS.md`.
+Se utilizo IA para interpretar los requerimientos, priorizar el MVP, diseñar la estructura de datos, generar codigo inicial, revisar errores y crear documentacion. Los prompts principales deben guardarse en `PROMPTS.md`.

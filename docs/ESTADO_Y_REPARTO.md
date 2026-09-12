@@ -169,7 +169,7 @@ Mejorar mensajes de validacion
 - Ejecutar `php artisan test` antes de subir.
 - Actualizar `CHANGELOG.md` con cada cambio importante.
 - Registrar prompts relevantes en `PROMPTS.md` cuando se use IA.
-- Usar commits pequenos y claros.
+- Usar commits pequeños y claros.
 - Evitar mezclar funcionalidades distintas en un mismo commit.
 - No subir credenciales, claves, tokens ni `.env`.
 

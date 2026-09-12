@@ -168,7 +168,7 @@
         .topbar {
             position: sticky;
             top: 0;
-            z-index: 12;
+            z-index: 100;
             min-height: 66px;
             display: flex;
             justify-content: space-between;
@@ -300,7 +300,81 @@
         .two { grid-template-columns: minmax(0, 1.15fr) minmax(420px, .85fr); }
         .card { background: color-mix(in srgb, var(--surface) 96%, transparent); border: 1px solid var(--line); border-radius: 8px; padding: 16px; box-shadow: var(--shadow); }
         .section { margin-top: 12px; }
-        .flash { margin-bottom: 16px; border-color: color-mix(in srgb, var(--green) 40%, var(--line)); background: var(--mint); color: var(--green-dark); }
+        .toast-stack {
+            position: fixed;
+            top: 82px;
+            right: 22px;
+            z-index: 60;
+            display: grid;
+            gap: 10px;
+            width: min(380px, calc(100vw - 28px));
+            pointer-events: none;
+        }
+        .toast {
+            min-height: 68px;
+            display: grid;
+            grid-template-columns: 42px 1fr 32px;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: color-mix(in srgb, var(--surface) 96%, transparent);
+            color: var(--ink);
+            box-shadow: 0 18px 42px color-mix(in srgb, var(--ink) 16%, transparent);
+            pointer-events: auto;
+            animation: toast-in .28s ease-out;
+            overflow: hidden;
+            position: relative;
+        }
+        .toast::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 3px;
+            width: 100%;
+            background: currentColor;
+            opacity: .62;
+            transform-origin: left;
+            animation: toast-life 4.2s linear forwards;
+        }
+        .toast.success { color: var(--green-dark); }
+        .toast.error { color: var(--red); }
+        .toast-icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 8px;
+            background: var(--mint);
+        }
+        .toast.error .toast-icon { background: var(--danger-soft); }
+        .toast-body strong { display: block; color: var(--ink); line-height: 1.2; }
+        .toast-body p { margin-top: 3px; color: var(--muted); font-size: .84rem; line-height: 1.35; }
+        .toast-close {
+            width: 32px;
+            height: 32px;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+        }
+        .toast-close:hover { background: var(--surface-2); color: var(--ink); }
+        .toast.is-hiding { animation: toast-out .22s ease-in forwards; }
+        @keyframes toast-in {
+            from { opacity: 0; transform: translateY(-8px) translateX(18px); }
+            to { opacity: 1; transform: translateY(0) translateX(0); }
+        }
+        @keyframes toast-out {
+            to { opacity: 0; transform: translateY(-6px) translateX(18px); }
+        }
+        @keyframes toast-life {
+            to { transform: scaleX(0); }
+        }
         .card-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
         .card-title h2 { font-size: 1.15rem; line-height: 1.2; }
         .muted { color: var(--muted); font-size: .86rem; }
@@ -441,6 +515,7 @@
             .sidebar { position: relative; height: auto; }
             .sidebar-toggle { display: none; }
             .user-dropdown { width: min(280px, calc(100vw - 34px)); }
+            .toast-stack { top: 12px; right: 14px; }
             .kpis, .two, .form-grid { grid-template-columns: 1fr; }
         }
     </style>
@@ -499,8 +574,30 @@
                 </div>
             </header>
 
-            @if (session('status'))
-                <section class="card flash">{{ session('status') }}</section>
+            @if (session('status') || session('error') || $errors->any())
+                <div class="toast-stack" data-toast-stack>
+                    @if (session('status'))
+                        <section class="toast success" data-toast>
+                            <span class="toast-icon"><i data-lucide="circle-check"></i></span>
+                            <div class="toast-body">
+                                <strong>Operacion realizada</strong>
+                                <p>{{ session('status') }}</p>
+                            </div>
+                            <button class="toast-close" type="button" aria-label="Cerrar notificacion" data-toast-close><i data-lucide="x"></i></button>
+                        </section>
+                    @endif
+
+                    @if (session('error') || $errors->any())
+                        <section class="toast error" data-toast>
+                            <span class="toast-icon"><i data-lucide="triangle-alert"></i></span>
+                            <div class="toast-body">
+                                <strong>Revisa la informacion</strong>
+                                <p>{{ session('error') ?? 'Hay campos pendientes o con datos incorrectos.' }}</p>
+                            </div>
+                            <button class="toast-close" type="button" aria-label="Cerrar notificacion" data-toast-close><i data-lucide="x"></i></button>
+                        </section>
+                    @endif
+                </div>
             @endif
 
             @yield('content')
@@ -575,6 +672,16 @@
                 userMenu?.classList.remove('open');
                 userMenuToggle?.setAttribute('aria-expanded', 'false');
             }
+        });
+
+        document.querySelectorAll('[data-toast]').forEach((toast) => {
+            const closeToast = () => {
+                toast.classList.add('is-hiding');
+                window.setTimeout(() => toast.remove(), 220);
+            };
+
+            toast.querySelector('[data-toast-close]')?.addEventListener('click', closeToast);
+            window.setTimeout(closeToast, 4200);
         });
 
         if (window.lucide) {

@@ -109,6 +109,7 @@
             background: #fff;
             color: #52709f;
         }
+        .password-field { padding-right: 8px; }
         .field input {
             width: 100%;
             border: 0;
@@ -116,6 +117,21 @@
             font: inherit;
             color: var(--ink);
             background: transparent;
+        }
+        .password-toggle {
+            width: 40px;
+            height: 40px;
+            border: 0;
+            border-radius: 12px;
+            background: transparent;
+            color: #52709f;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+        }
+        .password-toggle:hover {
+            background: var(--soft);
+            color: var(--blue);
         }
         .field-row { margin-bottom: 18px; }
         .error {
@@ -187,10 +203,13 @@
                 </div>
 
                 <div class="field-row">
-                    <label for="password">Contrasena</label>
-                    <div class="field">
+                    <label for="password">Contraseña</label>
+                    <div class="field password-field">
                         <i data-lucide="lock-keyhole"></i>
                         <input id="password" name="password" type="password" autocomplete="current-password" required>
+                        <button class="password-toggle" type="button" aria-label="Mostrar contraseña" data-password-toggle>
+                            <i data-lucide="eye"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -211,6 +230,19 @@
             </form>
         </section>
     </main>
-    <script>lucide.createIcons();</script>
+    <script>
+        const passwordInput = document.getElementById('password');
+        const passwordToggle = document.querySelector('[data-password-toggle]');
+
+        passwordToggle?.addEventListener('click', () => {
+            const shouldShow = passwordInput.type === 'password';
+            passwordInput.type = shouldShow ? 'text' : 'password';
+            passwordToggle.setAttribute('aria-label', shouldShow ? 'Ocultar contraseña' : 'Mostrar contraseña');
+            passwordToggle.querySelector('i')?.setAttribute('data-lucide', shouldShow ? 'eye-off' : 'eye');
+            lucide.createIcons();
+        });
+
+        lucide.createIcons();
+    </script>
 </body>
 </html>
