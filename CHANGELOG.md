@@ -6,6 +6,18 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 
 ### Cambiado
 
+- Vista dashboard ajustada para funcionar como resumen informativo sin acciones de creacion, con hero a ancho completo y KPIs separados.
+- Barra global de busqueda, periodo y acciones retirada del layout principal porque cada modulo cuenta con filtros propios.
+- Menu lateral actualizado para poder ocultarse y mostrarse, conservando la preferencia en el navegador.
+- Dashboard compactado para verse completo en escritorio sin desplazamiento vertical, con resumen ejecutivo de granjas y alertas.
+- Limpieza visual de pantallas principales para diferenciar mejor dashboard, generacion, reportes, mapa, alertas, paneles y configuracion.
+- Barra superior conservada con buscador, periodo, usuario y acciones contextuales para futura funcionalidad.
+- Dashboard reorganizado como vista de monitoreo nacional con KPIs reales, grafica, ranking y alertas.
+- Pantalla de generacion reorganizada como vista historica con filtros, graficas, tabla completa y acciones.
+- Paneles reorganizado como catalogo tecnico con filtros, lista y detalle lateral, diferenciandolo del dashboard.
+- Textos de KPIs ajustados para evitar tendencias fijas no calculadas.
+- Reportes ajustado para mostrar "Vista imprimible" y "Exportar CSV" segun la funcionalidad real.
+- Configuracion ajustada para que sus accesos funcionen como enlaces a secciones del formulario.
 - Integrados en `develop` los cambios que fueron enviados a `main` por error, conservando tambien el trabajo previo de `develop`.
 - Compatibilizacion de dependencias para ejecutar el proyecto con PHP 8.3 mediante `composer update -W`.
 - Correccion del factor de CO2 evitado de `0.70` a `0.40 kg CO2/kWh`, alineado con las bases de la competencia.
@@ -17,6 +29,15 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 
 ### Agregado
 
+- Vista de detalle por granja solar con datos generales, KPIs, paneles instalados, historial de generacion y alertas.
+- Administracion de paneles instalados por granja: agregar, actualizar cantidad y retirar paneles.
+- Pantalla para editar modelos de paneles solares.
+- Accion para desactivar modelos de paneles solares.
+- Accesos desde listados hacia detalle, edicion y desactivacion de granjas y paneles.
+- Pruebas de humo para validar pantallas de detalle de granja y edicion de panel.
+- Documento `docs/cambios/2026-09-11-cierre-crud-paneles-granjas.md` con el detalle del cierre funcional.
+- Documento `docs/cambios/2026-09-11-limpieza-visual-vistas.md` con el detalle del rediseño visual.
+- Documento `docs/cambios/2026-09-11-menu-plegable-dashboard-compacto.md` con el detalle del menu plegable y dashboard compacto.
 - Pantalla para editar granjas solares.
 - Accion para desactivar granjas solares sin borrar su historial.
 - Formulario para crear registros historicos de generacion mensual.
@@ -43,6 +64,9 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 
 - `php artisan migrate:fresh --seed`
 - `php artisan test`
+- `php artisan route:list --name=farms`
+- `php artisan route:list --name=panels`
+- Revision HTTP local de rutas principales con respuestas `200`.
 
 ## Convencion para proximos cambios
 

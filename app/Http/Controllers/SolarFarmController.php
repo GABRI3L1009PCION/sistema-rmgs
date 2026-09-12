@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Department;
 use App\Models\EnergyRecord;
+use App\Models\FarmPanel;
 use App\Models\PanelModel;
 use App\Models\SolarFarm;
 use App\Services\SolarMetricsService;
@@ -46,6 +47,29 @@ class SolarFarmController extends Controller
         ]);
     }
 
+    public function show(SolarFarm $farm)
+    {
+        $farm->load([
+            'department',
+            'farmPanels.panelModel',
+            'energyRecords' => fn ($query) => $query->orderByDesc('period'),
+            'alerts' => fn ($query) => $query->orderByDesc('period'),
+        ]);
+
+        return view('farms.show', [
+            'farm' => $farm,
+            'panelModels' => PanelModel::where('status', 'active')->orderBy('brand')->get(),
+            'stats' => [
+                'panels' => $farm->farmPanels->sum('quantity'),
+                'capacity_kw' => $farm->installedCapacityKw(),
+                'actual_kwh' => $farm->energyRecords->sum('actual_kwh'),
+                'expected_kwh' => $farm->energyRecords->sum('expected_kwh'),
+                'co2_tons' => round($farm->energyRecords->sum('co2_avoided_kg') / 1000, 2),
+                'projection' => $farm->projectedGenerationKwh(),
+            ],
+        ]);
+    }
+
     public function panels()
     {
         $panelModels = PanelModel::with('farmPanels.solarFarm.department')
@@ -85,6 +109,34 @@ class SolarFarmController extends Controller
         PanelModel::create($validated);
 
         return redirect()->route('panels.index')->with('status', 'Modelo de panel registrado correctamente.');
+    }
+
+    public function editPanel(PanelModel $panel)
+    {
+        return view('panels.edit', [
+            'panel' => $panel,
+        ]);
+    }
+
+    public function updatePanel(Request $request, PanelModel $panel)
+    {
+        $validated = $request->validate([
+            'brand' => ['required', 'string', 'max:100'],
+            'model' => ['required', 'string', 'max:150'],
+            'nominal_power_kw' => ['required', 'numeric', 'min:0.001'],
+            'status' => ['required', 'in:active,inactive'],
+        ]);
+
+        $panel->update($validated);
+
+        return redirect()->route('panels.index')->with('status', 'Modelo de panel actualizado correctamente.');
+    }
+
+    public function deactivatePanel(PanelModel $panel)
+    {
+        $panel->update(['status' => 'inactive']);
+
+        return redirect()->route('panels.index')->with('status', 'Modelo de panel desactivado correctamente.');
     }
 
     public function generation()
@@ -198,6 +250,45 @@ class SolarFarmController extends Controller
         $farm->update(['status' => 'inactive']);
 
         return redirect()->route('farms.index')->with('status', 'Granja solar desactivada correctamente.');
+    }
+
+    public function storeFarmPanel(Request $request, SolarFarm $farm)
+    {
+        $validated = $request->validate([
+            'panel_model_id' => ['required', 'exists:panel_models,id'],
+            'quantity' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $installation = FarmPanel::firstOrNew([
+            'solar_farm_id' => $farm->id,
+            'panel_model_id' => $validated['panel_model_id'],
+        ]);
+        $installation->quantity = (int) $installation->quantity + (int) $validated['quantity'];
+        $installation->save();
+
+        return redirect()->route('farms.show', $farm)->with('status', 'Paneles agregados a la granja correctamente.');
+    }
+
+    public function updateFarmPanel(Request $request, SolarFarm $farm, FarmPanel $farmPanel)
+    {
+        abort_unless($farmPanel->solar_farm_id === $farm->id, 404);
+
+        $validated = $request->validate([
+            'quantity' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $farmPanel->update(['quantity' => $validated['quantity']]);
+
+        return redirect()->route('farms.show', $farm)->with('status', 'Cantidad de paneles actualizada correctamente.');
+    }
+
+    public function destroyFarmPanel(SolarFarm $farm, FarmPanel $farmPanel)
+    {
+        abort_unless($farmPanel->solar_farm_id === $farm->id, 404);
+
+        $farmPanel->delete();
+
+        return redirect()->route('farms.show', $farm)->with('status', 'Paneles retirados de la granja correctamente.');
     }
 
     public function createRecord()

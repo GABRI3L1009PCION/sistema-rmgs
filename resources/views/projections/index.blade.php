@@ -17,7 +17,7 @@
     </style>
 
     <div class="projections-screen">
-        <section class="projections-hero"><div><p class="eyebrow">RMGS - Registro y Monitoreo de Generacion Solar Guatemala</p><h1>Proyecciones</h1><p class="subtitle">Planificamos un futuro mas limpio y sostenible.</p><p class="caption">Escenarios de generacion para una mejor toma de decisiones.</p></div><div class="hero-note"><i data-lucide="map-pin"></i><span>Guatemala, un pais con mas energia limpia</span></div></section>
+        <section class="projections-hero"><div><p class="eyebrow">Escenarios {{ $startYear }} - {{ $endYear }}</p><h1>Proyecciones</h1><p class="subtitle">Estimacion de crecimiento con base conservadora, esperada y optimista.</p><p class="caption">La base parte del historial registrado y aplica crecimiento anual simple.</p></div><div class="hero-note"><i data-lucide="line-chart"></i><span>Conservador 3%, base 8%, optimista 12%</span></div></section>
         <section class="grid projection-kpis">
             <article class="card projection-kpi"><span class="projection-kpi-icon green"><i data-lucide="leaf"></i></span><div><p class="projection-kpi-label">Generacion proyectada ({{ $endYear }})</p><p class="projection-kpi-value">{{ number_format($stats['projected_generation']) }} kWh</p><p class="projection-kpi-trend">+36% <span>vs. {{ $startYear }}</span></p></div></article>
             <article class="card projection-kpi"><span class="projection-kpi-icon"><i data-lucide="bar-chart-3"></i></span><div><p class="projection-kpi-label">Capacidad proyectada</p><p class="projection-kpi-value">{{ number_format($stats['projected_capacity'],1) }} kW</p><p class="projection-kpi-trend">+36% <span>vs. {{ $startYear }}</span></p></div></article>

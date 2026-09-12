@@ -23,6 +23,7 @@
 - [x] Dashboard con KPIs claros.
 - [x] Mapa interactivo.
 - [x] Grafica real vs esperada.
+- [x] Limpieza visual de vistas para reducir elementos decorativos o no funcionales.
 - [ ] Revision visual en pantalla de presentacion.
 
 ## Funcionalidad y requerimientos
@@ -42,6 +43,9 @@
 - [x] Pruebas unitarias de calculos solares.
 - [x] CRUD completo para editar/desactivar granjas.
 - [x] CRUD completo para registros historicos.
+- [x] Vista de detalle por granja solar.
+- [x] CRUD funcional para modelos de paneles: crear, editar y desactivar.
+- [x] Administracion de paneles instalados por granja.
 
 ## Documentacion
 
@@ -64,7 +68,8 @@
 - [x] Reglas para actualizar `CHANGELOG.md`.
 - [x] Reglas para registrar prompts y evidencia de IA.
 - [x] Regla para documentar cada cambio en `docs/cambios/`.
-- [ ] Pull Requests o merges documentados hacia `develop`.
+- [x] Merges documentados hacia `develop`.
+- [ ] Pull Requests revisados en GitHub hacia `develop`.
 - [ ] Version estable final en `main`.
 
 ## Presentacion

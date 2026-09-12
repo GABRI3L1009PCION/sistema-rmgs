@@ -22,10 +22,10 @@
     </style>
 
     <div class="alerts-screen">
-        <section class="alerts-hero"><div><p class="eyebrow">RMGS - Registro y Monitoreo de Generacion Solar Guatemala</p><h1>Alertas de desempeno</h1><p class="subtitle">Detectamos desviaciones para una operacion mas segura y eficiente.</p></div><div class="hero-note"><i data-lucide="map-pin"></i><span>Guatemala, un pais con mas energia limpia</span></div></section>
+        <section class="alerts-hero"><div><p class="eyebrow">Control operativo</p><h1>Alertas de desempeno</h1><p class="subtitle">Prioriza granjas con produccion baja y marca el seguimiento realizado.</p></div><div class="hero-note"><i data-lucide="triangle-alert"></i><span>Una alerta nace al caer 20% o mas</span></div></section>
         <section class="grid alert-kpis">
             <article class="card alert-kpi"><span class="alert-kpi-icon high"><i data-lucide="triangle-alert"></i></span><div><p class="alert-kpi-label">Alta prioridad</p><p class="alert-kpi-value">{{ $stats['high'] }}</p><p class="alert-kpi-trend bad">Desviacion +25%</p></div></article>
-            <article class="card alert-kpi"><span class="alert-kpi-icon medium"><i data-lucide="triangle-alert"></i></span><div><p class="alert-kpi-label">Media prioridad</p><p class="alert-kpi-value">{{ $stats['medium'] }}</p><p class="alert-kpi-trend good">Desviacion +20%</p></div></article>
+            <article class="card alert-kpi"><span class="alert-kpi-icon medium"><i data-lucide="triangle-alert"></i></span><div><p class="alert-kpi-label">Media prioridad</p><p class="alert-kpi-value">{{ $stats['medium'] }}</p><p class="alert-kpi-trend good">Desviacion 20% a 24%</p></div></article>
             <article class="card alert-kpi"><span class="alert-kpi-icon low"><i data-lucide="info"></i></span><div><p class="alert-kpi-label">Baja prioridad</p><p class="alert-kpi-value">{{ $stats['low'] }}</p><p class="alert-kpi-trend good">En observacion</p></div></article>
             <article class="card alert-kpi"><span class="alert-kpi-icon resolved"><i data-lucide="circle-check"></i></span><div><p class="alert-kpi-label">Alertas resueltas</p><p class="alert-kpi-value">{{ $stats['resolved'] }}</p><p class="alert-kpi-trend good">Historial completo</p></div></article>
         </section>

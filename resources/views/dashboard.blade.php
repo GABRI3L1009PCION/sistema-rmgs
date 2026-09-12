@@ -2,132 +2,156 @@
 
 @section('content')
     @php
-        $featuredFarms = $farms->take(3);
-        $monthlyGeneration = $stats['actual_kwh'];
-        $dailyAverage = $records->count() ? $stats['actual_kwh'] / max($records->count() * 30, 1) : 0;
-        $equivalentHomes = $stats['actual_kwh'] ? $stats['actual_kwh'] / 40 : 0;
-        $equivalentTrees = $stats['co2_tons'] ? $stats['co2_tons'] * 34.5 : 0;
+        $featuredFarms = $farms->sortByDesc(fn ($farm) => $farm->energyRecords->sum('actual_kwh'))->take(3);
+        $activeFarms = $farms->where('status', 'active')->count();
+        $compliance = $stats['expected_kwh'] > 0 ? ($stats['actual_kwh'] / $stats['expected_kwh']) * 100 : 0;
+        $topDepartment = $departmentReports->first();
     @endphp
 
     <style>
-        body:has(.dashboard-screen) { overflow: hidden; }
-        .dashboard-screen { height: calc(100dvh - 86px); min-height: 630px; display: grid; grid-template-rows: clamp(132px, 15vh, 146px) 62px 112px minmax(160px, 1fr) 150px; gap: 8px; }
-        .hero { border-radius: 8px; position: relative; overflow: hidden; display: grid; align-items: center; padding: 22px 28px; color: white; background: linear-gradient(90deg, rgba(4,25,55,.82), rgba(4,25,55,.30), rgba(4,25,55,.05)), url('{{ asset('images/dashboard-hero-guatemala.png') }}') center 58% / cover; box-shadow: var(--shadow); }
-        .hero-content { position: relative; z-index: 1; max-width: 680px; transform: translateY(-1px); }
-        .hero-eyebrow { font-size: .72rem; margin-bottom: 4px; opacity: .94; }
-        .hero h1 { font-size: clamp(1.9rem, 2.2vw, 2.35rem); line-height: .96; letter-spacing: 0; max-width: 590px; }
-        .hero-content > p:last-child { margin-top: 4px; font-size: .88rem; line-height: 1.2; opacity: .96; }
-        .hero-location { position: absolute; z-index: 2; top: 17px; right: 22px; display: grid; grid-template-columns: 22px 1fr; gap: 7px; max-width: 205px; font-size: .7rem; font-weight: 800; text-shadow: 0 1px 8px rgba(0,0,0,.35); }
-        .filter-row { display: grid; grid-template-columns: minmax(430px,.95fr) minmax(360px,1.05fr); align-items: end; gap: 28px; }
-        .filter-control { display: block; align-self: stretch; }
-        .filter-control > span:first-child { display: block; margin-bottom: 3px; color: var(--muted); font-size: .72rem; font-weight: 800; }
-        .select-shell { height: 42px; display: flex; align-items: center; gap: 9px; padding: 0 13px; overflow: hidden; background: white; border: 1px solid var(--line); border-radius: 8px; }
-        .select-shell select { border: 0; outline: 0; padding: 0; min-height: 38px; box-shadow: none; font-size: .82rem; font-weight: 800; background: transparent; }
-        .map-note { height: 46px; display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: center; color: var(--muted); padding-left: 22px; border-left: 1px solid var(--line); font-size: .76rem; line-height: 1.25; }
-        .map-note-icon { width: 28px; height: 28px; border-radius: 50%; background: #dff1ff; color: var(--blue); display: grid; place-items: center; }
-        .map-note-icon svg { width: 17px; }
-        .map-note strong { color: var(--ink); }
-        .map-note button { border: 0; padding: 0; background: transparent; color: var(--blue); font-weight: 900; cursor: pointer; }
-        .kpis { grid-template-columns: repeat(4, minmax(0,1fr)); }
-        .kpi-card { min-width: 0; display: grid; grid-template-columns: 58px minmax(0,1fr); gap: 13px; align-items: center; padding: 13px 16px; }
-        .kpi-icon { width: 56px; height: 56px; border-radius: 8px; display: grid; place-items: center; }
-        .kpi-icon svg { width: 29px; height: 29px; stroke-width: 2.5; }
-        .kpi-icon.green { background: var(--mint); color: var(--green-dark); }
-        .kpi-icon.blue { background: var(--blue-soft); color: var(--blue); }
-        .kpi-copy { min-width: 0; }
-        .kpi-label { font-weight: 800; margin-bottom: 5px; font-size: .78rem; line-height: 1.15; white-space: nowrap; }
-        .kpi-value { font-size: clamp(1.38rem,1.7vw,1.9rem); font-weight: 900; line-height: 1; white-space: nowrap; }
-        .kpi-trend { margin-top: 6px; color: var(--green); font-size: .78rem; font-weight: 900; }
-        .kpi-trend span { margin-left: 6px; color: var(--muted); font-size: .67rem; font-weight: 700; white-space: nowrap; }
-        .primary-grid { grid-template-columns: minmax(0,1.48fr) minmax(340px,.82fr); min-height: 0; }
-        .chart-card, .summary-card { min-height: 0; overflow: hidden; }
-        .chart-card { display: grid; grid-template-rows: 36px minmax(0,1fr); }
-        .chart-card .card-title, .summary-card .card-title { margin: 0; }
+        body:has(.dashboard-screen) { overflow: auto; }
+        .dashboard-screen {
+            min-height: calc(100dvh - 82px);
+            display: grid;
+            grid-template-rows: 136px 82px 300px 158px;
+            gap: 8px;
+            overflow: visible;
+            padding-bottom: 10px;
+        }
+        .overview-strip { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        .dashboard-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+        .dashboard-screen .card { padding: 10px 12px; }
+        .mission-panel { min-height: 0; display: grid; align-content: center; gap: 8px; color: white; background: linear-gradient(90deg, rgba(5,28,46,.9), rgba(5,28,46,.44)), url('{{ asset('images/dashboard-hero-guatemala.png') }}') center 58% / cover; }
+        .mission-panel h1 { max-width: 620px; font-size: clamp(1.42rem,1.85vw,1.95rem); line-height: 1.12; }
+        .mission-panel p { max-width: 620px; color: rgba(255,255,255,.9); font-size: .8rem; line-height: 1.45; }
+        .mini-kpi { min-height: 0; display: grid; grid-template-columns: 42px minmax(0,1fr); align-items: center; gap: 12px; }
+        .mini-kpi-icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 8px; background: var(--blue-soft); color: var(--blue); }
+        .mini-kpi-icon.green { background: var(--mint); color: var(--green-dark); }
+        .mini-kpi strong { display: block; font-size: 1.28rem; line-height: 1; margin-top: 0; }
+        .mini-kpi span { color: var(--muted); font-size: .7rem; font-weight: 800; }
+        .workbench { min-height: 0; display: grid; grid-template-columns: minmax(0,1.35fr) minmax(360px,.75fr); gap: 8px; align-items: stretch; }
+        .chart-card { min-height: 0; display: grid; grid-template-rows: 34px minmax(0,1fr); overflow: hidden; }
         .chart-wrap { min-height: 0; }
+        .chart-wrap canvas { max-height: 100%; }
         .chart-wrap canvas { width: 100% !important; height: 100% !important; }
-        .month-picker.compact { min-height: 34px; padding: 0 12px; font-size: .75rem; }
-        .summary-card { display: grid; grid-template-rows: 32px minmax(0,1fr) 38px; }
-        .summary-list { min-height: 0; display: grid; grid-template-rows: repeat(4,1fr); }
-        .summary-item { display: grid; grid-template-columns: 25px 1fr auto; align-items: center; gap: 8px; min-height: 0; border-bottom: 1px solid #e8eff7; font-size: .74rem; }
-        .summary-item svg { width: 18px; color: var(--blue); }
-        .summary-item strong { font-size: .78rem; white-space: nowrap; }
-        .summary-callout { margin-top: 6px; padding: 0 11px; border-radius: 8px; background: #e7f7ee; color: #2c7255; display: flex; gap: 8px; align-items: center; font-size: .72rem; }
-        .summary-callout svg { width: 18px; }
-        .bottom-grid { grid-template-columns: minmax(360px,.82fr) minmax(0,1.18fr); min-height: 0; }
-        .bottom-grid .card { min-height: 0; overflow: visible; padding: 8px 14px; }
-        .bottom-grid .card-title { margin-bottom: 4px; }
-        .bottom-grid .card-title h2 { font-size: .9rem; }
-        .alert-list { display: grid; gap: 5px; }
-        .alert-row { display: grid; grid-template-columns: 28px 1fr auto; gap: 8px; align-items: center; min-height: 42px; padding: 4px 8px; border: 1px solid #e8eff7; border-radius: 7px; font-size: .68rem; }
-        .alert-row p { margin-top: 2px; }
-        .alert-icon { width: 25px; height: 25px; border-radius: 6px; display: grid; place-items: center; color: white; }
-        .alert-icon svg { width: 15px; }
-        .alert-icon.red { background: var(--red); }
-        .alert-icon.amber { background: var(--amber); }
-        .table-card { overflow: hidden; }
-        .table-card table { table-layout: fixed; font-size: .66rem; }
-        .table-card th, .table-card td { padding: 4px 7px; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .farm-thumb { width: 30px; height: 22px; flex: 0 0 auto; border-radius: 4px; background: url('https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=120&q=70') center / cover; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block; margin-right: 5px; }
-        .map-dialog { width: min(1000px,90vw); border: 0; border-radius: 8px; padding: 0; box-shadow: 0 28px 80px rgba(7,22,74,.28); }
-        .map-dialog::backdrop { background: rgba(7,22,50,.48); }
-        .map-dialog-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--line); }
-        .map-dialog #map { height: min(620px,72vh); border: 0; border-radius: 0; }
+        .workbench > aside { min-height: 0; overflow: hidden; }
+        .health-grid { display: grid; gap: 6px; }
+        .health-item { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: #f8fbff; font-size: .78rem; }
+        .health-item svg { width: 20px; color: var(--blue); }
+        .health-item strong { white-space: nowrap; }
+        .bottom-layout { min-height: 0; display: grid; grid-template-columns: minmax(0,1fr) minmax(360px,.72fr); gap: 8px; }
+        .bottom-layout > .card { min-height: 0; overflow: hidden; }
+        .farm-ranking table { table-layout: fixed; }
+        .farm-ranking table { font-size: .66rem; }
+        .farm-ranking td, .farm-ranking th { padding: 3px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .status-text { display: inline-flex; align-items: center; gap: 6px; }
+        .status-text::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+        .status-text.maintenance::before { background: var(--amber); }
+        .status-text.inactive::before { background: var(--red); }
+        .alert-stack { display: grid; gap: 6px; }
+        .alert-tile { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; background: #fff7ed; color: #8a4b08; font-size: .7rem; }
+        .alert-tile p { font-size: .72rem; line-height: 1.1; }
+        .alert-tile svg { width: 18px; color: var(--amber); }
+        .alert-tile.danger { background: #fff1f0; color: #a11d1d; }
+        .alert-tile.danger svg { color: var(--red); }
         @media (max-width: 1180px) {
             body:has(.dashboard-screen) { overflow: auto; }
-            .dashboard-screen { height: auto; min-height: 0; grid-template-rows: auto; }
-            .hero { min-height: 175px; }
-            .filter-row { grid-template-columns: 1fr; gap: 8px; }
-            .map-note { border-left: 0; padding-left: 0; }
-            .kpis { grid-template-columns: repeat(2,minmax(0,1fr)); }
-            .primary-grid, .bottom-grid { grid-template-columns: 1fr; }
-            .chart-card { height: 330px; }
-            .summary-card { min-height: 260px; }
+            .dashboard-screen { height: auto; min-height: 0; overflow: visible; }
+            .overview-strip, .dashboard-kpis, .workbench, .bottom-layout { grid-template-columns: 1fr; }
+            .mini-kpi, .mission-panel { min-height: 150px; }
+            .chart-card { min-height: 340px; }
         }
-        @media (max-width: 700px) { .kpis { grid-template-columns: 1fr; } .hero-location { display: none; } .hero h1 { font-size: 2rem; } }
     </style>
 
     <div class="dashboard-screen">
-        <section class="hero">
-            <div class="hero-content"><p class="hero-eyebrow">RMGS - Registro y Monitoreo de Generacion Solar Guatemala</p><h1>Energia solar<br>para un mejor manana</h1><p>Monitoreamos hoy un Guatemala mas limpio y sostenible.</p></div>
-            <div class="hero-location"><i data-lucide="map-pin"></i><span>Guatemala, un pais con mas energia limpia</span></div>
+        <section class="overview-strip">
+            <article class="card mission-panel">
+                <div>
+                    <p class="muted" style="color:rgba(255,255,255,.78)">RMGS Guatemala</p>
+                    <h1>Monitoreo nacional de generacion solar</h1>
+                    <p>{{ number_format($stats['families']) }} familias beneficiadas y {{ number_format($stats['co2_tons'], 1) }} toneladas de CO2 evitadas con datos registrados.</p>
+                </div>
+            </article>
         </section>
 
-        <section class="filter-row">
-            <label class="filter-control"><span>Departamento</span><span class="select-shell"><i data-lucide="map-pin"></i><select aria-label="Departamento"><option>Todos los departamentos</option>@foreach ($departmentReports as $report)<option>{{ $report['department'] }}</option>@endforeach</select><i data-lucide="chevron-down"></i></span></label>
-            <div class="map-note"><span class="map-note-icon"><i data-lucide="info"></i></span><p><strong>Mapa disponible en <button type="button" data-open-map>Ver mapa</button>.</strong><br>Selecciona un departamento para visualizar las granjas.</p></div>
+        <section class="dashboard-kpis">
+            <article class="card mini-kpi"><span class="mini-kpi-icon green"><i data-lucide="landmark"></i></span><div><strong>{{ number_format($activeFarms) }}/{{ number_format($stats['farms']) }}</strong><span>Granjas activas</span></div></article>
+            <article class="card mini-kpi"><span class="mini-kpi-icon"><i data-lucide="zap"></i></span><div><strong>{{ number_format($stats['capacity_kw'], 1) }} kW</strong><span>Capacidad instalada</span></div></article>
+            <article class="card mini-kpi"><span class="mini-kpi-icon green"><i data-lucide="target"></i></span><div><strong>{{ number_format($compliance, 1) }}%</strong><span>Cumplimiento acumulado</span></div></article>
         </section>
 
-        <section class="grid kpis">
-            <article class="card kpi-card"><span class="kpi-icon green"><i data-lucide="landmark"></i></span><div class="kpi-copy"><p class="kpi-label">Granjas solares</p><p class="kpi-value">{{ number_format($stats['farms']) }}</p><p class="kpi-trend">+20% <span>vs. mes anterior</span></p></div></article>
-            <article class="card kpi-card" id="paneles"><span class="kpi-icon blue"><i data-lucide="grid-2x2"></i></span><div class="kpi-copy"><p class="kpi-label">Paneles instalados</p><p class="kpi-value">{{ number_format($stats['panels']) }}</p><p class="kpi-trend">+12% <span>vs. mes anterior</span></p></div></article>
-            <article class="card kpi-card"><span class="kpi-icon blue"><i data-lucide="zap"></i></span><div class="kpi-copy"><p class="kpi-label">Capacidad instalada</p><p class="kpi-value">{{ number_format($stats['capacity_kw'], 1) }} kW</p><p class="kpi-trend">+8% <span>vs. mes anterior</span></p></div></article>
-            <article class="card kpi-card"><span class="kpi-icon green"><i data-lucide="leaf"></i></span><div class="kpi-copy"><p class="kpi-label">CO2 evitado</p><p class="kpi-value">{{ number_format($stats['co2_tons'], 1) }} t</p><p class="kpi-trend">+14% <span>vs. mes anterior</span></p></div></article>
+        <section class="workbench">
+            <article class="card chart-card">
+                <div class="card-title"><h2>Generacion real contra esperada</h2><span class="muted">Ultimos periodos</span></div>
+                <div class="chart-wrap"><canvas id="generationChart"></canvas></div>
+            </article>
+
+            <aside class="card">
+                <div class="card-title"><h2>Lectura rapida</h2><span class="muted">Acumulado</span></div>
+                <div class="health-grid">
+                    <div class="health-item"><i data-lucide="bar-chart-3"></i><span>Generacion acumulada</span><strong>{{ number_format($stats['actual_kwh']) }} kWh</strong></div>
+                    <div class="health-item"><i data-lucide="grid-2x2"></i><span>Paneles instalados</span><strong>{{ number_format($stats['panels']) }}</strong></div>
+                    <div class="health-item"><i data-lucide="map-pin"></i><span>Departamento lider</span><strong>{{ $topDepartment['department'] ?? 'Sin datos' }}</strong></div>
+                    <div class="health-item"><i data-lucide="bell"></i><span>Alertas activas</span><strong>{{ number_format($alerts->count()) }}</strong></div>
+                </div>
+            </aside>
         </section>
 
-        <section class="grid primary-grid">
-            <article class="card chart-card" id="proyecciones"><div class="card-title"><h2>Generacion real vs esperada</h2><span class="month-picker compact">Septiembre 2026 <i data-lucide="chevron-down"></i></span></div><div class="chart-wrap"><canvas id="generationChart"></canvas></div></article>
-            <article class="card summary-card"><div class="card-title"><h2><i data-lucide="bar-chart-3"></i> Resumen nacional</h2></div><div class="summary-list"><div class="summary-item"><i data-lucide="zap"></i><span>Generacion del mes</span><strong>{{ number_format($monthlyGeneration) }} kWh</strong></div><div class="summary-item"><i data-lucide="bar-chart-3"></i><span>Promedio diario</span><strong>{{ number_format($dailyAverage) }} kWh</strong></div><div class="summary-item"><i data-lucide="leaf"></i><span>Hogares equivalentes</span><strong>~ {{ number_format($equivalentHomes) }}</strong></div><div class="summary-item"><i data-lucide="trees"></i><span>Arboles equivalentes</span><strong>~ {{ number_format($equivalentTrees) }}</strong></div></div><div class="summary-callout"><i data-lucide="leaf"></i><span>Contribuyendo a un Guatemala mas sostenible.</span></div></article>
-        </section>
+        <section class="bottom-layout">
+            <article class="card farm-ranking">
+                <div class="card-title"><h2>Granjas con mayor generacion</h2><span class="muted">Top 3</span></div>
+                <table>
+                    <thead><tr><th>Granja</th><th>Departamento</th><th>Capacidad</th><th>Generacion</th><th>Estado</th></tr></thead>
+                    <tbody>
+                        @foreach ($featuredFarms as $farm)
+                            <tr>
+                                <td><strong>{{ $farm->name }}</strong></td>
+                                <td>{{ $farm->department->name }}</td>
+                                <td>{{ number_format($farm->installedCapacityKw(), 1) }} kW</td>
+                                <td>{{ number_format($farm->energyRecords->sum('actual_kwh')) }} kWh</td>
+                                <td><span class="status-text {{ $farm->status }}">{{ $farm->status === 'maintenance' ? 'Mantenimiento' : ($farm->status === 'active' ? 'Activa' : 'Inactiva') }}</span></td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </article>
 
-        <section class="grid bottom-grid">
-            <article class="card" id="alertas"><div class="card-title"><h2><i data-lucide="bell"></i> Alertas recientes</h2><a class="muted" href="{{ route('alerts.index') }}">Ver todas</a></div><div class="alert-list">@forelse ($alerts->take(2) as $alert)<div class="alert-row"><span class="alert-icon red"><i data-lucide="triangle-alert"></i></span><div><strong>Produccion por debajo de lo esperado</strong><p class="muted">{{ $alert->solarFarm->name }}</p></div><span class="muted">{{ $alert->period->format('M Y') }}</span></div>@empty<div class="alert-row"><span class="alert-icon amber"><i data-lucide="circle-check"></i></span><div><strong>Sin alertas activas</strong><p class="muted">Todas las granjas se mantienen dentro del rango esperado.</p></div><span class="muted">Hoy</span></div>@endforelse</div></article>
-            <article class="card table-card"><div class="card-title"><h2>Granjas registradas</h2><a class="muted" href="{{ route('farms.create') }}">Ver todas</a></div><table><thead><tr><th style="width:29%">Nombre</th><th>Departamento</th><th>Capacidad (kW)</th><th>Generacion (kWh)</th><th>Estado</th></tr></thead><tbody>@foreach ($featuredFarms as $farm)<tr><td><span class="nav"><span class="farm-thumb"></span><strong>{{ $farm->name }}</strong></span></td><td>{{ $farm->department->name }}</td><td>{{ number_format($farm->installedCapacityKw(), 1) }}</td><td>{{ number_format($farm->energyRecords->sum('actual_kwh')) }}</td><td><span class="status-dot"></span>{{ ucfirst($farm->status) }}</td></tr>@endforeach</tbody></table></article>
+            <article class="card">
+                <div class="card-title"><h2>Atencion requerida</h2><span class="muted">Activas</span></div>
+                <div class="alert-stack">
+                    @forelse ($alerts->take(2) as $alert)
+                        <div class="alert-tile danger"><i data-lucide="triangle-alert"></i><div><strong>{{ $alert->solarFarm->name }}</strong><p class="muted">{{ number_format($alert->deviation_percent, 1) }}% debajo de lo esperado</p></div><span>{{ $alert->period->format('m/Y') }}</span></div>
+                    @empty
+                        <div class="alert-tile"><i data-lucide="circle-check"></i><div><strong>Sin alertas activas</strong><p class="muted">Las granjas estan dentro del rango esperado.</p></div><span>Hoy</span></div>
+                    @endforelse
+                </div>
+            </article>
         </section>
     </div>
-
-    <dialog class="map-dialog" id="mapa"><div class="map-dialog-header"><h2>Mapa de granjas solares</h2><form method="dialog"><button class="btn" aria-label="Cerrar mapa"><i data-lucide="x"></i></button></form></div><div id="map"></div></dialog>
 
     <script>
         const generationSeries = @json($generationSeries);
         const labels = Object.keys(generationSeries);
-        new Chart(document.getElementById('generationChart'), { type: 'line', data: { labels, datasets: [{ label: 'Generacion real', data: labels.map(label => generationSeries[label].actual), borderColor: '#0aa574', backgroundColor: 'rgba(10,165,116,.10)', tension: .35, fill: true, pointRadius: 0, borderWidth: 3 }, { label: 'Generacion esperada', data: labels.map(label => generationSeries[label].expected), borderColor: '#1689f4', borderDash: [7,5], tension: .35, pointRadius: 0, borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 3 } }, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 7, padding: 12, font: { size: 10 } } } }, scales: { x: { grid: { color: '#e8eff7' }, ticks: { color: '#58709b', font: { size: 9 } } }, y: { grid: { color: '#e8eff7' }, ticks: { color: '#58709b', font: { size: 9 } } } } } });
-        const farms = @json($mapFarms);
-        const mapDialog = document.getElementById('mapa');
-        const map = L.map('map').setView([15.2,-90.4], 7);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap' }).addTo(map);
-        farms.forEach(farm => L.marker([farm.lat,farm.lng]).addTo(map).bindPopup(`<strong>${farm.name}</strong><br>${farm.municipality}, ${farm.department}<br>Capacidad: ${Number(farm.capacity_kw).toFixed(1)} kW`));
-        document.querySelectorAll('[data-open-map], a[href="/#mapa"]').forEach(trigger => trigger.addEventListener('click', event => { event.preventDefault(); mapDialog.showModal(); window.setTimeout(() => map.invalidateSize(), 80); }));
-        if (window.location.hash === '#mapa') { mapDialog.showModal(); window.setTimeout(() => map.invalidateSize(), 80); }
+
+        new Chart(document.getElementById('generationChart'), {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    { label: 'Real', data: labels.map(label => generationSeries[label].actual), borderColor: '#0aa574', backgroundColor: 'rgba(10,165,116,.10)', tension: .35, fill: true, borderWidth: 3 },
+                    { label: 'Esperada', data: labels.map(label => generationSeries[label].expected), borderColor: '#1689f4', borderDash: [7,5], tension: .35, borderWidth: 2 },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: { padding: { top: 2, right: 8, bottom: 0, left: 0 } },
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 34, padding: 8 } } },
+                scales: {
+                    x: { grid: { color: '#e8eff7' }, ticks: { maxRotation: 0 } },
+                    y: { grid: { color: '#e8eff7' } },
+                },
+            },
+        });
     </script>
 @endsection
