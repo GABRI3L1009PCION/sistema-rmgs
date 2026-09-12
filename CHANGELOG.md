@@ -14,6 +14,8 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 
 ### Agregado
 
+- Guia para colaboradores en `docs/GUIA_COLABORADOR.md` con pasos para clonar, instalar, correr, probar y trabajar con ramas.
+- Documento `docs/cambios/2026-09-11-guia-colaborador.md` con el detalle del cambio.
 - Pruebas unitarias para las reglas solares criticas.
 - Documento `docs/cambios/2026-09-11-pruebas-reglas-solares.md` con el detalle de las pruebas agregadas.
 - Servicio `SolarMetricsService` para centralizar calculos de capacidad instalada, CO2 evitado, desviacion, alertas y proyeccion.
