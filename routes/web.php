@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/paneles/{panel}/editar', [SolarFarmController::class, 'editPanel'])->name('panels.edit');
     Route::put('/paneles/{panel}', [SolarFarmController::class, 'updatePanel'])->name('panels.update');
     Route::patch('/paneles/{panel}/desactivar', [SolarFarmController::class, 'deactivatePanel'])->name('panels.deactivate');
+    Route::patch('/paneles/instalaciones/{farmPanel}/estado', [SolarFarmController::class, 'togglePanelInstallation'])->name('panels.installations.toggle');
     Route::get('/generacion', [SolarFarmController::class, 'generation'])->name('records.index');
     Route::get('/reportes', [DashboardController::class, 'reports'])->name('reports.index');
     Route::get('/reportes/excel', [DashboardController::class, 'reportCsv'])->name('reports.csv');

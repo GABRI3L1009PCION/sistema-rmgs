@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('content')
     @php
@@ -20,7 +20,9 @@
                 'name' => $item->solarFarm->name,
                 'department' => $item->solarFarm->department->name,
                 'quantity' => $item->quantity,
+                'status' => $item->status,
                 'capacity_kw' => round($item->quantity * $panel->nominal_power_kw, 2),
+                'toggle_url' => route('panels.installations.toggle', $item),
             ])->values(),
         ]]);
     @endphp
@@ -83,8 +85,15 @@
         .spec svg { width: 16px; color: #5976aa; }
         .installations-title { margin: 12px 0 8px; font-size: .76rem; }
         .installation-list { display: grid; gap: 6px; }
-        .installation-row { display: flex; justify-content: space-between; gap: 10px; padding: 7px 8px; border-radius: 6px; background: #f7fafe; font-size: .66rem; }
+        .installation-row { display: grid; grid-template-columns: minmax(0,1fr) auto auto; align-items: center; gap: 10px; padding: 7px 8px; border-radius: 6px; background: #f7fafe; font-size: .66rem; }
         .installation-row strong { white-space: nowrap; }
+        .installation-status { display: inline-flex; align-items: center; gap: 5px; margin-top: 3px; color: var(--green-dark); font-weight: 800; }
+        .installation-status::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+        .installation-status.inactive { color: var(--muted); }
+        .installation-status.inactive::before { background: #8ca1bd; }
+        .installation-toggle { width: 28px; height: 28px; display: inline-grid; place-items: center; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--blue); cursor: pointer; }
+        .installation-toggle.danger { color: var(--red); }
+        .installation-toggle svg { width: 15px; }
         @media(max-width:1180px){body:has(.panels-screen){overflow:auto}.panels-screen{height:auto;grid-template-rows:auto}.panel-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.panels-content{grid-template-columns:1fr}.panel-list,.panel-detail{min-height:430px}}
         @media(max-width:700px){.panel-filters{grid-template-columns:1fr}.panels-hero .hero-note{display:none}}
     </style>
@@ -111,7 +120,7 @@
                 <header class="panel-list-title">
                     <h2><i data-lucide="grid-2x2"></i>Modelos de paneles solares</h2>
                     <div class="panel-list-meta">
-                        <span>Mostrando <strong id="panel-visible-count">{{ $panelModels->sum(fn ($panel) => max(1, $panel->farmPanels->count())) }}</strong> registros</span>
+                        <span>Mostrando <strong id="panel-visible-count">{{ $panelModels->count() }}</strong> modelos</span>
                         <a class="panel-add" href="{{ route('panels.create') }}" title="Registrar nuevo modelo"><i data-lucide="plus"></i></a>
                     </div>
                 </header>
@@ -119,57 +128,36 @@
                     <table class="panel-table">
                         <thead>
                             <tr>
-                                <th style="width:28%">Modelo</th>
+                                <th style="width:31%">Modelo</th>
                                 <th style="width:13%">Potencia (Wp)</th>
                                 <th style="width:16%">Cantidad instalada</th>
-                                <th style="width:21%">Granja</th>
+                                <th style="width:18%">Granjas asociadas</th>
                                 <th style="width:12%">Estado</th>
                                 <th style="width:10%; text-align:right">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($panelModels as $panel)
-                                @forelse($panel->farmPanels as $installation)
-                                    <tr class="panel-row" data-row-key="installation-{{ $installation->id }}" data-panel-id="{{ $panel->id }}" data-installation-id="{{ $installation->id }}" data-brand="{{ $panel->brand }}" data-status="{{ $panel->status }}" data-farm="{{ $installation->solarFarm->name }}" data-search="{{ strtolower($panel->brand.' '.$panel->model.' '.$installation->solarFarm->name) }}">
-                                        <td><span class="panel-name"><span class="panel-mini"></span><strong>{{ $panel->brand }} {{ $panel->model }}</strong></span></td>
-                                        <td>{{ number_format($panel->nominal_power_kw * 1000) }}</td>
-                                        <td>{{ number_format($installation->quantity) }}</td>
-                                        <td>{{ $installation->solarFarm->name }}</td>
-                                        <td><span class="panel-state {{ $panel->status }}">{{ $panel->status === 'active' ? 'Activo' : 'Inactivo' }}</span></td>
-                                        <td>
-                                            <span class="panel-row-actions">
-                                                <a class="panel-action" href="{{ route('panels.edit', $panel) }}" title="Editar panel"><i data-lucide="pencil"></i></a>
-                                                @if($panel->status !== 'inactive')
-                                                    <form method="post" action="{{ route('panels.deactivate', $panel) }}">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button class="panel-action danger" type="submit" title="Desactivar panel"><i data-lucide="power"></i></button>
-                                                    </form>
-                                                @endif
-                                            </span>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr class="panel-row" data-row-key="model-{{ $panel->id }}" data-panel-id="{{ $panel->id }}" data-installation-id="" data-brand="{{ $panel->brand }}" data-status="{{ $panel->status }}" data-farm="" data-search="{{ strtolower($panel->brand.' '.$panel->model) }}">
-                                        <td><span class="panel-name"><span class="panel-mini"></span><strong>{{ $panel->brand }} {{ $panel->model }}</strong></span></td>
-                                        <td>{{ number_format($panel->nominal_power_kw * 1000) }}</td>
-                                        <td>0</td>
-                                        <td>Sin asignar</td>
-                                        <td><span class="panel-state {{ $panel->status }}">{{ $panel->status === 'active' ? 'Activo' : 'Inactivo' }}</span></td>
-                                        <td>
-                                            <span class="panel-row-actions">
-                                                <a class="panel-action" href="{{ route('panels.edit', $panel) }}" title="Editar panel"><i data-lucide="pencil"></i></a>
-                                                @if($panel->status !== 'inactive')
-                                                    <form method="post" action="{{ route('panels.deactivate', $panel) }}">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button class="panel-action danger" type="submit" title="Desactivar panel"><i data-lucide="power"></i></button>
-                                                    </form>
-                                                @endif
-                                            </span>
-                                        </td>
-                                    </tr>
-                                @endforelse
+                                @php
+                                    $farmNames = $panel->farmPanels->map(fn ($installation) => $installation->solarFarm->name);
+                                @endphp
+                                <tr class="panel-row" data-row-key="model-{{ $panel->id }}" data-panel-id="{{ $panel->id }}" data-installation-id="" data-brand="{{ $panel->brand }}" data-status="{{ $panel->status }}" data-farm="{{ $farmNames->implode('|') }}" data-search="{{ strtolower($panel->brand.' '.$panel->model.' '.$farmNames->implode(' ')) }}">
+                                    <td><span class="panel-name"><span class="panel-mini"></span><strong>{{ $panel->brand }} {{ $panel->model }}</strong></span></td>
+                                    <td>{{ number_format($panel->nominal_power_kw * 1000) }}</td>
+                                    <td>{{ number_format($panel->farmPanels->sum('quantity')) }}</td>
+                                    <td>{{ $panel->farmPanels->count() ? $panel->farmPanels->count().' granja(s)' : 'Sin asignar' }}</td>
+                                    <td><span class="panel-state {{ $panel->status }}">{{ $panel->status === 'active' ? 'Activo' : 'Inactivo' }}</span></td>
+                                    <td>
+                                        <span class="panel-row-actions">
+                                            <a class="panel-action" href="{{ route('panels.edit', $panel) }}" title="Editar modelo"><i data-lucide="pencil"></i></a>
+                                            <form method="post" action="{{ route('panels.deactivate', $panel) }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button class="panel-action {{ $panel->status === 'active' ? 'danger' : '' }}" type="submit" title="{{ $panel->status === 'active' ? 'Desactivar modelo' : 'Activar modelo' }}"><i data-lucide="{{ $panel->status === 'active' ? 'power' : 'rotate-ccw' }}"></i></button>
+                                            </form>
+                                        </span>
+                                    </td>
+                                </tr>
                             @endforeach
                         </tbody>
                     </table>
@@ -198,7 +186,7 @@
                         <div class="spec"><i data-lucide="weight"></i><span>Peso<br><strong id="detail-weight">Sin especificar</strong></span></div>
                         <div class="spec"><i data-lucide="shield-check"></i><span>Garantia<br><strong id="detail-warranty">Sin especificar</strong></span></div>
                     </div>
-                    <h3 class="installations-title">Instalacion seleccionada</h3>
+                    <h3 class="installations-title">Instalaciones del modelo</h3>
                     <div class="installation-list" id="installation-list"></div>
                 </div>
             </aside>
@@ -212,6 +200,7 @@
         const statusFilter = document.getElementById('panel-status-filter');
         const farmFilter = document.getElementById('panel-farm-filter');
         const panelSearch = document.getElementById('panel-search');
+        const csrfToken = '{{ csrf_token() }}';
 
         function escapeHtml(value) {
             const element = document.createElement('span');
@@ -237,13 +226,14 @@
             document.getElementById('detail-efficiency').textContent = panel.efficiency ? `${panel.efficiency}%` : 'Sin especificar';
             document.getElementById('detail-dimensions').textContent = panel.dimensions || 'Sin especificar';
             document.getElementById('detail-weight').textContent = panel.weight_kg ? `${panel.weight_kg} kg` : 'Sin especificar';
-            document.getElementById('detail-warranty').textContent = panel.warranty_years ? `${panel.warranty_years} anos` : 'Sin especificar';
-
-            const selectedInstallation = panel.farms.find(farm => Number(farm.id) === Number(installationId));
-            document.getElementById('installation-list').innerHTML = selectedInstallation
-                ? `<div class="installation-row"><span>${escapeHtml(selectedInstallation.name)}<br><small>${escapeHtml(selectedInstallation.department)} · ${Number(selectedInstallation.capacity_kw).toLocaleString()} kW</small></span><strong>${Number(selectedInstallation.quantity).toLocaleString()} paneles</strong></div>`
+            document.getElementById('detail-warranty').textContent = panel.warranty_years ? `${panel.warranty_years} años` : 'Sin especificar';
+            const selectedInstallation = installationId ? panel.farms.find(farm => Number(farm.id) === Number(installationId)) : null;
+            const installations = selectedInstallation ? [selectedInstallation] : panel.farms;
+            document.getElementById('installation-list').innerHTML = installations.length
+                ? installations.map(installation => `<div class="installation-row"><span>${escapeHtml(installation.name)}<br><small>${escapeHtml(installation.department)} · ${Number(installation.capacity_kw).toLocaleString()} kW</small><span class="installation-status ${escapeHtml(installation.status)}">${installation.status === 'active' ? 'Activa' : 'Inactiva'}</span></span><strong>${Number(installation.quantity).toLocaleString()} paneles</strong><form method="post" action="${escapeHtml(installation.toggle_url)}"><input type="hidden" name="_token" value="${csrfToken}"><input type="hidden" name="_method" value="PATCH"><button class="installation-toggle ${installation.status === 'active' ? 'danger' : ''}" type="submit" title="${installation.status === 'active' ? 'Desactivar instalación' : 'Activar instalación'}"><i data-lucide="${installation.status === 'active' ? 'power' : 'rotate-ccw'}"></i></button></form></div>`).join('')
                 : '<div class="installation-row"><span>Sin instalaciones asociadas</span></div>';
             panelRows.forEach(row => row.classList.toggle('selected', row.dataset.rowKey === rowKey));
+            lucide.createIcons();
         }
 
         function filterPanels() {
@@ -253,7 +243,7 @@
             panelRows.forEach(row => {
                 const show = (!brandFilter.value || row.dataset.brand === brandFilter.value)
                     && (!statusFilter.value || row.dataset.status === statusFilter.value)
-                    && (!farmFilter.value || row.dataset.farm === farmFilter.value)
+                    && (!farmFilter.value || row.dataset.farm.split('|').includes(farmFilter.value))
                     && (!query || row.dataset.search.includes(query));
                 row.hidden = !show;
 

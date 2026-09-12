@@ -216,7 +216,7 @@ class DashboardController extends Controller
                 'daily_average' => round($actual / max($days, 1), 2),
                 'co2_tons' => round($co2Tons, 2),
                 'active_farms' => $scopeFarms->where('status', 'active')->count(),
-                'panels' => $scopeFarms->sum(fn (SolarFarm $farm) => $farm->farmPanels->sum('quantity')),
+                'panels' => $scopeFarms->sum(fn (SolarFarm $farm) => $farm->installedPanelsCount()),
                 'compliance' => round($compliance, 2),
             ],
             'generationSeries' => $generationSeries,
@@ -312,7 +312,7 @@ class DashboardController extends Controller
                 'lat' => (float) $farm->latitude,
                 'lng' => (float) $farm->longitude,
                 'status' => $farm->status,
-                'panels' => $farm->farmPanels->sum('quantity'),
+                'panels' => $farm->installedPanelsCount(),
                 'capacity_kw' => $farm->installedCapacityKw(),
                 'co2_tons' => round($farm->energyRecords->sum('co2_avoided_kg') / 1000, 2),
             ])->values(),
@@ -323,7 +323,7 @@ class DashboardController extends Controller
     {
         return [
             'farms' => $farms->count(),
-            'panels' => $farms->sum(fn (SolarFarm $farm) => $farm->farmPanels->sum('quantity')),
+            'panels' => $farms->sum(fn (SolarFarm $farm) => $farm->installedPanelsCount()),
             'capacity_kw' => round($farms->sum(fn (SolarFarm $farm) => $farm->installedCapacityKw()), 2),
             'actual_kwh' => round($records->sum('actual_kwh'), 2),
             'expected_kwh' => round($records->sum('expected_kwh'), 2),
@@ -418,7 +418,7 @@ class DashboardController extends Controller
             return [
                 'department' => $department->name,
                 'farms' => $farms->count(),
-                'panels' => $farms->sum(fn (SolarFarm $farm) => $farm->farmPanels->sum('quantity')),
+                'panels' => $farms->sum(fn (SolarFarm $farm) => $farm->installedPanelsCount()),
                 'capacity_kw' => round($farms->sum(fn (SolarFarm $farm) => $farm->installedCapacityKw()), 2),
                 'actual_kwh' => round($records->sum('actual_kwh'), 2),
                 'expected_kwh' => round($records->sum('expected_kwh'), 2),

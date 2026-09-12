@@ -12,6 +12,10 @@
         .farm-detail-status.maintenance::before { background: var(--amber); }
         .farm-detail-status.inactive { background: #fff1f0; color: var(--red); }
         .farm-detail-status.inactive::before { background: var(--red); }
+        .panel-installation-status { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; color: var(--green-dark); }
+        .panel-installation-status::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+        .panel-installation-status.inactive { color: var(--muted); }
+        .panel-installation-status.inactive::before { background: #8ca1bd; }
         .detail-kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
         .detail-kpi { display: grid; gap: 6px; }
         .detail-kpi strong { font-size: 1.45rem; line-height: 1; }
@@ -97,7 +101,7 @@
                 <div class="empty-box">Esta granja aun no tiene paneles asignados.</div>
             @else
                 <table>
-                    <thead><tr><th>Modelo</th><th>Potencia unitaria</th><th>Cantidad</th><th>Capacidad</th><th style="text-align:right">Acciones</th></tr></thead>
+                    <thead><tr><th>Modelo</th><th>Potencia unitaria</th><th>Cantidad</th><th>Capacidad</th><th>Estado</th><th style="text-align:right">Acciones</th></tr></thead>
                     <tbody>
                         @foreach ($farm->farmPanels as $installation)
                             <tr>
@@ -112,8 +116,14 @@
                                     </form>
                                 </td>
                                 <td>{{ number_format($installation->quantity * $installation->panelModel->nominal_power_kw, 2) }} kW</td>
+                                <td><span class="panel-installation-status {{ $installation->status }}">{{ $installation->status === 'active' ? 'Activa' : 'Inactiva' }}</span></td>
                                 <td>
                                     <div class="compact-actions">
+                                        <form method="post" action="{{ route('panels.installations.toggle', $installation) }}">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button class="btn {{ $installation->status === 'active' ? 'danger' : '' }}" type="submit"><i data-lucide="{{ $installation->status === 'active' ? 'power' : 'rotate-ccw' }}"></i>{{ $installation->status === 'active' ? 'Desactivar' : 'Activar' }}</button>
+                                        </form>
                                         <form method="post" action="{{ route('farms.panels.destroy', [$farm, $installation]) }}">
                                             @csrf
                                             @method('DELETE')

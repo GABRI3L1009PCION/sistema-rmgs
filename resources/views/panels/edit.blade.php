@@ -27,12 +27,12 @@
                 <label>Modelo<input name="model" value="{{ old('model', $panel->model) }}" required maxlength="150">@error('model')<span class="error">{{ $message }}</span>@enderror</label>
                 <label>Potencia nominal (kW)<input name="nominal_power_kw" type="number" step="0.001" min="0.001" value="{{ old('nominal_power_kw', $panel->nominal_power_kw) }}" required>@error('nominal_power_kw')<span class="error">{{ $message }}</span>@enderror</label>
                 <label>Estado<select name="status" required><option value="active" @selected(old('status', $panel->status) === 'active')>Activo</option><option value="inactive" @selected(old('status', $panel->status) === 'inactive')>Inactivo</option></select>@error('status')<span class="error">{{ $message }}</span>@enderror</label>
-                <label>Tecnologia<input name="technology" value="{{ old('technology', $panel->technology ?? 'Monocristalino') }}" required maxlength="100">@error('technology')<span class="error">{{ $message }}</span>@enderror</label>
+                <label>Tecnología<input name="technology" value="{{ old('technology', $panel->technology ?? 'Monocristalino') }}" required maxlength="100">@error('technology')<span class="error">{{ $message }}</span>@enderror</label>
                 <label>Tipo de panel<input name="panel_type" value="{{ old('panel_type', $panel->panel_type ?? 'Modulo fotovoltaico') }}" required maxlength="100">@error('panel_type')<span class="error">{{ $message }}</span>@enderror</label>
                 <label>Eficiencia (%)<input name="efficiency_percent" type="number" step="0.01" min="0.01" max="100" value="{{ old('efficiency_percent', $panel->efficiency_percent) }}" placeholder="Ej. 21.50">@error('efficiency_percent')<span class="error">{{ $message }}</span>@enderror</label>
                 <label>Dimensiones<input name="dimensions" value="{{ old('dimensions', $panel->dimensions) }}" maxlength="100" placeholder="2278 x 1134 x 30 mm">@error('dimensions')<span class="error">{{ $message }}</span>@enderror</label>
                 <label>Peso (kg)<input name="weight_kg" type="number" step="0.01" min="0" value="{{ old('weight_kg', $panel->weight_kg) }}" placeholder="Ej. 28.60">@error('weight_kg')<span class="error">{{ $message }}</span>@enderror</label>
-                <label>Garantia (anos)<input name="warranty_years" type="number" min="1" max="100" value="{{ old('warranty_years', $panel->warranty_years) }}" placeholder="Ej. 25">@error('warranty_years')<span class="error">{{ $message }}</span>@enderror</label>
+                <label>Garantía (años)<input name="warranty_years" type="number" min="1" max="100" value="{{ old('warranty_years', $panel->warranty_years) }}" placeholder="Ej. 25">@error('warranty_years')<span class="error">{{ $message }}</span>@enderror</label>
             </div>
 
             @if($panel->farmPanels->isNotEmpty())

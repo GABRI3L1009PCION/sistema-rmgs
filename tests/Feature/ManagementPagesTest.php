@@ -156,15 +156,62 @@ class ManagementPagesTest extends TestCase
         $this->assertEqualsWithDelta(-90.6064, (float) $farm->longitude, 0.0001);
     }
 
-    public function test_panel_rows_have_unique_installation_selection_keys(): void
+    public function test_panel_page_lists_each_model_once_with_installations_in_detail(): void
     {
         $panel = PanelModel::where('brand', 'HelioTech')->with('farmPanels')->firstOrFail();
         $response = $this->get(route('panels.index'));
 
         $response->assertOk();
-        foreach ($panel->farmPanels as $installation) {
-            $response->assertSee('data-row-key="installation-'.$installation->id.'"', false);
-        }
+        $response->assertSee('data-row-key="model-'.$panel->id.'"', false);
+        $response->assertDontSee('data-row-key="installation-'.$panel->farmPanels->first()->id.'"', false);
+        $response->assertSee($panel->farmPanels->count().' granja(s)');
+    }
+
+    public function test_panel_status_can_be_toggled_back_and_forth(): void
+    {
+        $panel = PanelModel::where('brand', 'HelioTech')->firstOrFail();
+
+        $this->patch(route('panels.deactivate', $panel))
+            ->assertRedirect(route('panels.index'));
+
+        $this->assertDatabaseHas('panel_models', [
+            'id' => $panel->id,
+            'status' => 'inactive',
+        ]);
+
+        $this->patch(route('panels.deactivate', $panel->fresh()))
+            ->assertRedirect(route('panels.index'));
+
+        $this->assertDatabaseHas('panel_models', [
+            'id' => $panel->id,
+            'status' => 'active',
+        ]);
+    }
+
+    public function test_panel_installation_status_can_be_toggled_without_changing_model(): void
+    {
+        $panel = PanelModel::where('brand', 'HelioTech')->with('farmPanels')->firstOrFail();
+        $installation = $panel->farmPanels->firstOrFail();
+
+        $this->patch(route('panels.installations.toggle', $installation))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('farm_panels', [
+            'id' => $installation->id,
+            'status' => 'inactive',
+        ]);
+        $this->assertDatabaseHas('panel_models', [
+            'id' => $panel->id,
+            'status' => 'active',
+        ]);
+
+        $this->patch(route('panels.installations.toggle', $installation->fresh()))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('farm_panels', [
+            'id' => $installation->id,
+            'status' => 'active',
+        ]);
     }
 
     public function test_panel_technical_data_and_installation_quantities_can_be_updated(): void

@@ -15,8 +15,19 @@ class SolarMetricsService
     public function installedCapacityKw(Collection $farmPanels): float
     {
         return round((float) $farmPanels->sum(
-            fn (FarmPanel $farmPanel) => $farmPanel->quantity * $farmPanel->panelModel->nominal_power_kw
+            fn (FarmPanel $farmPanel) => ($farmPanel->status ?? 'active') === 'active' && ($farmPanel->panelModel->status ?? 'active') === 'active'
+                ? $farmPanel->quantity * $farmPanel->panelModel->nominal_power_kw
+                : 0
         ), 2);
+    }
+
+    public function installedPanelsCount(Collection $farmPanels): int
+    {
+        return (int) $farmPanels->sum(
+            fn (FarmPanel $farmPanel) => ($farmPanel->status ?? 'active') === 'active' && ($farmPanel->panelModel->status ?? 'active') === 'active'
+                ? $farmPanel->quantity
+                : 0
+        );
     }
 
     public function co2AvoidedKg(float $actualKwh): float

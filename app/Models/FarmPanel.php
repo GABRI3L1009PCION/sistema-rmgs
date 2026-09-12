@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FarmPanel extends Model
 {
-    protected $fillable = ['solar_farm_id', 'panel_model_id', 'quantity'];
+    protected $fillable = ['solar_farm_id', 'panel_model_id', 'quantity', 'status'];
 
     public function solarFarm(): BelongsTo
     {

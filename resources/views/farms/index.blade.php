@@ -110,7 +110,7 @@
                         <thead><tr><th style="width:25%">Nombre</th><th style="width:17%">Departamento</th><th style="width:16%">Capacidad (kW)</th><th style="width:12%">Paneles</th><th style="width:17%">Estado</th><th style="width:13%; text-align:right">Acciones</th></tr></thead>
                         <tbody id="farms-table-body">
                             @foreach ($farms as $farm)
-                                @php $panelCount = $farm->farmPanels->sum('quantity'); @endphp
+                                @php $panelCount = $farm->installedPanelsCount(); @endphp
                                 <tr data-farm-id="{{ $farm->id }}" data-name="{{ strtolower($farm->name) }}" data-department="{{ $farm->department->name }}" data-municipality="{{ $farm->municipality }}" data-status="{{ $farm->status }}">
                                     <td><span class="farm-name"><img class="farm-thumb" src="{{ asset('images/dashboard-hero-guatemala.png') }}" alt=""><strong>{{ $farm->name }}</strong></span></td>
                                     <td>{{ $farm->department->name }}</td><td>{{ number_format($farm->installedCapacityKw(), 1) }}</td><td>{{ number_format($panelCount) }}</td>

@@ -46,6 +46,11 @@ class SolarFarm extends Model
         return app(SolarMetricsService::class)->installedCapacityKw($this->farmPanels);
     }
 
+    public function installedPanelsCount(): int
+    {
+        return app(SolarMetricsService::class)->installedPanelsCount($this->farmPanels);
+    }
+
     public function projectedGenerationKwh(): float
     {
         return app(SolarMetricsService::class)->projectedGenerationKwh($this->energyRecords);

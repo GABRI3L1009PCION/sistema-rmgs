@@ -27,7 +27,7 @@ class SolarFarmController extends Controller
             'municipalitiesByDepartment' => $this->municipalitiesByDepartment(),
             'stats' => [
                 'farms' => $farms->count(),
-                'panels' => $farms->sum(fn (SolarFarm $farm) => $farm->farmPanels->sum('quantity')),
+                'panels' => $farms->sum(fn (SolarFarm $farm) => $farm->installedPanelsCount()),
                 'capacity_kw' => round($farms->sum(fn (SolarFarm $farm) => $farm->installedCapacityKw()), 2),
                 'co2_tons' => round($farms->flatMap->energyRecords->sum('co2_avoided_kg') / 1000, 2),
             ],
@@ -68,7 +68,7 @@ class SolarFarmController extends Controller
             'farm' => $farm,
             'panelModels' => PanelModel::where('status', 'active')->orderBy('brand')->get(),
             'stats' => [
-                'panels' => $farm->farmPanels->sum('quantity'),
+                'panels' => $farm->installedPanelsCount(),
                 'capacity_kw' => $farm->installedCapacityKw(),
                 'actual_kwh' => $farm->energyRecords->sum('actual_kwh'),
                 'expected_kwh' => $farm->energyRecords->sum('expected_kwh'),
@@ -169,9 +169,16 @@ class SolarFarmController extends Controller
 
     public function deactivatePanel(PanelModel $panel)
     {
-        $panel->update(['status' => 'inactive']);
+        $panel->update([
+            'status' => $panel->status === 'active' ? 'inactive' : 'active',
+        ]);
 
-        return redirect()->route('panels.index')->with('status', 'Modelo de panel desactivado correctamente.');
+        return redirect()->route('panels.index')->with(
+            'status',
+            $panel->status === 'active'
+                ? 'Modelo de panel activado correctamente.'
+                : 'Modelo de panel desactivado correctamente.'
+        );
     }
 
     public function generation()
@@ -315,6 +322,7 @@ class SolarFarmController extends Controller
             'panel_model_id' => $validated['panel_model_id'],
         ]);
         $installation->quantity = (int) $installation->quantity + (int) $validated['quantity'];
+        $installation->status = 'active';
         $installation->save();
 
         return redirect()->route('farms.show', $farm)->with('status', 'Paneles agregados a la granja correctamente.');
@@ -340,6 +348,20 @@ class SolarFarmController extends Controller
         $farmPanel->delete();
 
         return redirect()->route('farms.show', $farm)->with('status', 'Paneles retirados de la granja correctamente.');
+    }
+
+    public function togglePanelInstallation(FarmPanel $farmPanel)
+    {
+        $farmPanel->update([
+            'status' => $farmPanel->status === 'active' ? 'inactive' : 'active',
+        ]);
+
+        return back()->with(
+            'status',
+            $farmPanel->status === 'active'
+                ? 'Instalación de paneles activada correctamente.'
+                : 'Instalación de paneles desactivada correctamente.'
+        );
     }
 
     public function createRecord()
