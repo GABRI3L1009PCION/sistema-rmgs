@@ -13,6 +13,8 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 
 ### Agregado
 
+- Pruebas unitarias para las reglas solares criticas.
+- Documento `docs/cambios/2026-09-11-pruebas-reglas-solares.md` con el detalle de las pruebas agregadas.
 - Servicio `SolarMetricsService` para centralizar calculos de capacidad instalada, CO2 evitado, desviacion, alertas y proyeccion.
 - Documento `docs/cambios/2026-09-11-servicio-reglas-solares.md` con el detalle del cambio.
 - Documento `docs/ESTADO_Y_REPARTO.md` con avance actual, pendientes y division de trabajo entre los integrantes.
