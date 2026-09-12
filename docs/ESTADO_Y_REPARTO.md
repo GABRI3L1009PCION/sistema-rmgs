@@ -41,13 +41,26 @@ Este documento resume que partes del reto ya estan implementadas, que falta comp
   - estadisticas;
   - documentacion minima.
 - Formulario rapido para crear una granja con registro inicial.
+- CRUD funcional de granjas solares:
+  - listado;
+  - detalle;
+  - edicion;
+  - desactivacion.
+- CRUD funcional de modelos de paneles:
+  - listado;
+  - creacion;
+  - edicion;
+  - desactivacion.
+- Administracion de paneles instalados por granja:
+  - agregar modelo de panel;
+  - actualizar cantidad;
+  - retirar paneles.
+- CRUD historico de registros de generacion por periodo.
 - Pruebas base y pruebas de reglas solares ejecutandose correctamente.
+- Pruebas de humo para pantallas de administracion de granjas y paneles.
 
 ### Implementado de forma parcial
 
-- CRUD de granjas solares: existe creacion, falta editar, consultar detalle y desactivar.
-- Registro de generacion: existe por datos demo y registro inicial, falta CRUD historico por periodo.
-- Paneles solares: existen modelos y relacion con granjas, falta administracion desde interfaz.
 - Validaciones: existen validaciones basicas, falta organizarlas y ampliar casos.
 - Documentacion: existe base tecnica, falta manual de usuario con capturas.
 - Uso de IA: existe `PROMPTS.md`, faltan capturas o evidencia visual.
@@ -58,12 +71,6 @@ Este documento resume que partes del reto ya estan implementadas, que falta comp
 
 - Deploy publico en la nube.
 - Configuracion final para MySQL o PostgreSQL.
-- CRUD completo de granjas solares.
-- CRUD de modelos de paneles.
-- Administracion de paneles por granja.
-- CRUD de registros historicos de generacion.
-- Vista de detalle por granja.
-- Desactivacion de granjas.
 - Manual de usuario.
 - Capturas de evidencia de uso de IA.
 - Presentacion final.
@@ -71,13 +78,12 @@ Este documento resume que partes del reto ya estan implementadas, que falta comp
 
 ## Prioridad de desarrollo
 
-1. Completar CRUD historico de generacion.
-2. Completar CRUD de granjas solares.
-3. Agregar vista de detalle por granja.
-4. Mejorar reglas de negocio y pruebas adicionales de integracion.
-5. Preparar deploy.
-6. Completar documentacion de usuario y evidencias.
-7. Preparar presentacion final.
+1. Mejorar reglas de negocio y pruebas adicionales de integracion.
+2. Preparar deploy.
+3. Completar documentacion de usuario y evidencias.
+4. Revisar UI/UX en la pantalla de presentacion.
+5. Preparar presentacion final.
+6. Ensayar demo en vivo.
 
 ## Reparto de trabajo
 
@@ -133,15 +139,15 @@ Tareas concretas:
   - listado;
   - detalle;
   - edicion;
-  - desactivacion.
+  - desactivacion. [hecho]
 - Crear CRUD de generacion por periodo:
   - registrar mes o periodo;
   - generacion esperada;
   - generacion real;
   - notas;
-  - recalculo de alerta.
-- Crear CRUD o pantalla de administracion de modelos de paneles.
-- Crear administracion de paneles instalados por granja.
+  - recalculo de alerta. [hecho]
+- Crear CRUD o pantalla de administracion de modelos de paneles. [hecho]
+- Crear administracion de paneles instalados por granja. [hecho]
 - Mejorar vistas responsive y mensajes de validacion.
 - Preparar capturas del sistema para manual y presentacion.
 

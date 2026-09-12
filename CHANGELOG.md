@@ -17,6 +17,13 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 
 ### Agregado
 
+- Vista de detalle por granja solar con datos generales, KPIs, paneles instalados, historial de generacion y alertas.
+- Administracion de paneles instalados por granja: agregar, actualizar cantidad y retirar paneles.
+- Pantalla para editar modelos de paneles solares.
+- Accion para desactivar modelos de paneles solares.
+- Accesos desde listados hacia detalle, edicion y desactivacion de granjas y paneles.
+- Pruebas de humo para validar pantallas de detalle de granja y edicion de panel.
+- Documento `docs/cambios/2026-09-11-cierre-crud-paneles-granjas.md` con el detalle del cierre funcional.
 - Pantalla para editar granjas solares.
 - Accion para desactivar granjas solares sin borrar su historial.
 - Formulario para crear registros historicos de generacion mensual.
@@ -43,6 +50,8 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 
 - `php artisan migrate:fresh --seed`
 - `php artisan test`
+- `php artisan route:list --name=farms`
+- `php artisan route:list --name=panels`
 
 ## Convencion para proximos cambios
 
