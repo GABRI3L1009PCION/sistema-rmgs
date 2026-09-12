@@ -18,22 +18,13 @@
 
     <style>
         body:has(.panels-screen) { overflow: hidden; }
-        .panels-screen { height: calc(100dvh - 86px); min-height: 650px; display: grid; grid-template-rows: clamp(132px,15vh,146px) 110px 64px minmax(330px,1fr); gap: 9px; }
+        .panels-screen { height: calc(100dvh - 86px); min-height: 650px; display: grid; grid-template-rows: clamp(150px,18vh,185px) 64px minmax(430px,1fr); gap: 10px; }
         .panels-hero { position: relative; overflow: hidden; display: flex; align-items: center; padding: 22px 28px; border-radius: 8px; color: white; background: linear-gradient(90deg,rgba(4,25,55,.82),rgba(4,25,55,.28),rgba(4,25,55,.05)),url('{{ asset('images/dashboard-hero-guatemala.png') }}') center 58%/cover; box-shadow: var(--shadow); }
         .panels-hero .eyebrow { margin-bottom: 7px; font-size: .72rem; opacity: .95; }
         .panels-hero h1 { font-size: clamp(2rem,2.4vw,2.5rem); line-height: 1; }
         .panels-hero .subtitle { margin-top: 7px; font-size: .9rem; }
         .panels-hero .hero-note { position: absolute; top: 17px; right: 22px; display: flex; gap: 7px; max-width: 190px; font-size: .68rem; font-weight: 800; }
         .panels-hero .hero-note svg { width: 18px; }
-        .panel-kpis { grid-template-columns: repeat(4,minmax(0,1fr)); }
-        .panel-kpi { min-width: 0; display: grid; grid-template-columns: 56px minmax(0,1fr); gap: 13px; align-items: center; padding: 12px 16px; }
-        .panel-kpi-icon { width: 54px; height: 54px; display: grid; place-items: center; border-radius: 8px; color: var(--blue); background: var(--blue-soft); }
-        .panel-kpi-icon.green { color: var(--green-dark); background: var(--mint); }
-        .panel-kpi-icon svg { width: 28px; height: 28px; }
-        .panel-kpi-label { margin-bottom: 5px; font-size: .73rem; white-space: nowrap; }
-        .panel-kpi-value { font-size: clamp(1.35rem,1.7vw,1.8rem); line-height: 1; font-weight: 900; white-space: nowrap; }
-        .panel-kpi-trend { margin-top: 6px; color: var(--green); font-size: .74rem; font-weight: 900; }
-        .panel-kpi-trend span { margin-left: 6px; color: var(--muted); font-size: .63rem; font-weight: 700; }
         .panel-filters { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; padding: 8px 14px; }
         .panel-filters label { gap: 3px; font-size: .65rem; }
         .panel-filter-box { position: relative; }
@@ -80,8 +71,8 @@
         .installation-list { display: grid; gap: 6px; }
         .installation-row { display: flex; justify-content: space-between; gap: 10px; padding: 7px 8px; border-radius: 6px; background: #f7fafe; font-size: .66rem; }
         .installation-row strong { white-space: nowrap; }
-        @media(max-width:1180px){body:has(.panels-screen){overflow:auto}.panels-screen{height:auto;grid-template-rows:auto}.panel-kpis,.panel-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.panels-content{grid-template-columns:1fr}.panel-list,.panel-detail{min-height:430px}}
-        @media(max-width:700px){.panel-kpis,.panel-filters{grid-template-columns:1fr}.panels-hero .hero-note{display:none}}
+        @media(max-width:1180px){body:has(.panels-screen){overflow:auto}.panels-screen{height:auto;grid-template-rows:auto}.panel-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.panels-content{grid-template-columns:1fr}.panel-list,.panel-detail{min-height:430px}}
+        @media(max-width:700px){.panel-filters{grid-template-columns:1fr}.panels-hero .hero-note{display:none}}
     </style>
 
     <div class="panels-screen">
@@ -92,13 +83,6 @@
                 <p class="subtitle">Tecnologia que impulsa un Guatemala mas limpio y sostenible.</p>
             </div>
             <div class="hero-note"><i data-lucide="grid-2x2"></i><span>Catalogo tecnico y disponibilidad instalada</span></div>
-        </section>
-
-        <section class="grid panel-kpis">
-            <article class="card panel-kpi"><span class="panel-kpi-icon"><i data-lucide="grid-2x2"></i></span><div><p class="panel-kpi-label">Modelos de paneles</p><p class="panel-kpi-value">{{ number_format($stats['models']) }}</p><p class="panel-kpi-trend">Catalogados</p></div></article>
-            <article class="card panel-kpi"><span class="panel-kpi-icon green"><i data-lucide="layers-3"></i></span><div><p class="panel-kpi-label">Total de paneles instalados</p><p class="panel-kpi-value">{{ number_format($stats['panels']) }}</p><p class="panel-kpi-trend">Asignados a granjas</p></div></article>
-            <article class="card panel-kpi"><span class="panel-kpi-icon"><i data-lucide="zap"></i></span><div><p class="panel-kpi-label">Potencia total instalada</p><p class="panel-kpi-value">{{ number_format($stats['capacity_kw'], 1) }} kW</p><p class="panel-kpi-trend">Calculada por modelo</p></div></article>
-            <article class="card panel-kpi"><span class="panel-kpi-icon green"><i data-lucide="landmark"></i></span><div><p class="panel-kpi-label">Granjas con paneles</p><p class="panel-kpi-value">{{ number_format($stats['farms']) }}</p><p class="panel-kpi-trend">En operacion tecnica</p></div></article>
         </section>
 
         <section class="card panel-filters">

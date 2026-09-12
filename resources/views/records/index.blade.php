@@ -4,6 +4,11 @@
     <style>
         body:has(.generation-screen) { overflow: auto; }
         .generation-screen { display: grid; gap: 12px; }
+        .generation-hero { min-height: 190px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 26px 32px; border-radius: 8px; color: white; background: linear-gradient(90deg, rgba(4,25,55,.86), rgba(4,25,55,.34), rgba(4,25,55,.08)), url('{{ asset('images/dashboard-hero-guatemala.png') }}') center 58% / cover; box-shadow: var(--shadow); }
+        .generation-hero h1 { font-size: clamp(2.2rem, 3vw, 3.4rem); line-height: 1; }
+        .generation-hero p { margin-top: 10px; max-width: 560px; font-size: 1rem; color: rgba(255,255,255,.92); }
+        .generation-hero-note { display: grid; grid-template-columns: 28px 1fr; gap: 10px; max-width: 260px; font-weight: 900; text-shadow: 0 1px 12px rgba(0,0,0,.35); }
+        .generation-hero-note svg { width: 26px; }
         .generation-toolbar { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
         .filter-card label { font-size: .72rem; }
         .metric-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -22,10 +27,20 @@
         .difference-negative { color: var(--red); font-weight: 900; }
         @media (max-width: 1100px) {
             .generation-toolbar, .metric-row, .generation-layout { grid-template-columns: 1fr; }
+            .generation-hero { display: grid; }
         }
     </style>
 
     <div class="generation-screen">
+        <section class="generation-hero">
+            <div>
+                <span>RMGS - Bitacora energetica</span>
+                <h1>Generacion mensual</h1>
+                <p>Compara lecturas reales contra metas esperadas y corrige historicos desde una sola vista operativa.</p>
+            </div>
+            <div class="generation-hero-note"><i data-lucide="activity"></i><span>Las alertas se recalculan al guardar cada lectura.</span></div>
+        </section>
+
         <section class="card filter-card generation-toolbar">
             <label>Periodo
                 <select id="period-filter">

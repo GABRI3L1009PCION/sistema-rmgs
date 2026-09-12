@@ -10,22 +10,19 @@ Varias vistas compartian el mismo estilo de hero, textos repetidos y datos fijos
 
 ## Cambios realizados
 
-- Se limpio la barra superior global:
-  - se retiro el buscador decorativo;
-  - se retiro el usuario ficticio;
-  - se agrego titulo y descripcion contextual por modulo;
-  - se conservaron solo acciones utiles segun la pantalla.
+- Se conservo la barra superior global con buscador, periodo, usuario y acciones contextuales para futura funcionalidad.
 - Se rediseño el dashboard como vista de monitoreo nacional:
   - KPIs reales;
   - grafica principal;
   - lectura rapida;
   - ranking de granjas;
   - alertas activas.
-- Se rediseño la pantalla de generacion como vista historica:
+- Se rediseño la pantalla de generacion como vista historica con header visual:
   - filtros claros;
   - metricas reales;
   - graficas;
   - tabla completa con acciones de editar y eliminar.
+- Se rediseño paneles como catalogo tecnico, retirando la fila de KPIs para diferenciarlo del dashboard.
 - Se ajustaron textos de granjas, paneles, alertas, mapa, reportes y proyecciones para que expliquen su objetivo real.
 - Se reemplazaron tendencias fijas por descripciones trazables.
 - Se corrigio el texto de reportes para indicar vista imprimible y exportacion CSV, evitando prometer un PDF real.

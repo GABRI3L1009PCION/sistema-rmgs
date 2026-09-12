@@ -7,9 +7,10 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 ### Cambiado
 
 - Limpieza visual de pantallas principales para diferenciar mejor dashboard, generacion, reportes, mapa, alertas, paneles y configuracion.
-- Barra superior actualizada con titulo contextual por modulo y acciones reales, retirando buscador decorativo y usuario ficticio.
+- Barra superior conservada con buscador, periodo, usuario y acciones contextuales para futura funcionalidad.
 - Dashboard reorganizado como vista de monitoreo nacional con KPIs reales, grafica, ranking y alertas.
 - Pantalla de generacion reorganizada como vista historica con filtros, graficas, tabla completa y acciones.
+- Paneles reorganizado como catalogo tecnico con filtros, lista y detalle lateral, diferenciandolo del dashboard.
 - Textos de KPIs ajustados para evitar tendencias fijas no calculadas.
 - Reportes ajustado para mostrar "Vista imprimible" y "Exportar CSV" segun la funcionalidad real.
 - Configuracion ajustada para que sus accesos funcionen como enlaces a secciones del formulario.
