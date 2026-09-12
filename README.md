@@ -10,10 +10,11 @@ Gestionar granjas solares por departamento, registrar paneles instalados, medir 
 
 - Catalogo de los 22 departamentos de Guatemala.
 - Registro de granjas solares con ubicacion geografica.
+- Edicion y desactivacion logica de granjas solares.
 - Asociacion de modelos de paneles y cantidades por granja.
 - Calculo de capacidad instalada en kW.
-- Registro de generacion real y esperada en kWh.
-- Calculo de CO2 evitado con factor `0.70 kg CO2/kWh`.
+- CRUD de registros historicos de generacion real y esperada en kWh.
+- Calculo de CO2 evitado con factor `0.40 kg CO2/kWh`.
 - Dashboard con KPIs nacionales.
 - Grafica de generacion real vs esperada.
 - Mapa interactivo con marcadores de granjas solares.
@@ -25,7 +26,7 @@ Gestionar granjas solares por departamento, registrar paneles instalados, medir 
 ## Tecnologias
 
 - Laravel 13
-- PHP 8.4
+- PHP 8.3 o superior
 - SQLite local para demo
 - Blade
 - Chart.js
@@ -36,6 +37,17 @@ Gestionar granjas solares por departamento, registrar paneles instalados, medir 
 
 ```bash
 composer install
+copy .env.example .env
+php artisan key:generate
+php artisan migrate:fresh --seed
+php artisan serve
+```
+
+Si el equipo trabaja con PHP 8.3 y el lock file exige paquetes para PHP 8.4, ejecutar:
+
+```bash
+composer update -W
+copy .env.example .env
 php artisan key:generate
 php artisan migrate:fresh --seed
 php artisan serve
@@ -58,7 +70,7 @@ http://127.0.0.1:8000
 ## Reglas de calculo
 
 - Capacidad instalada: `cantidad_paneles * potencia_nominal_kw`.
-- CO2 evitado: `generacion_real_kwh * 0.70`.
+- CO2 evitado: `generacion_real_kwh * 0.40`.
 - Alerta: se activa si la generacion real esta al menos 20% debajo de la esperada.
 - Proyeccion: promedio movil simple de los ultimos 3 registros reales de la granja.
 - Implementacion centralizada en `app/Services/SolarMetricsService.php`.
@@ -79,6 +91,16 @@ Cobertura actual:
 - activacion de alerta al 20%;
 - proyeccion por promedio movil;
 - capacidad instalada por cantidad y potencia de paneles.
+
+## Manual breve de usuario
+
+1. Entrar al dashboard en `/` para revisar indicadores nacionales, mapa, ranking por departamento, alertas y proyecciones.
+2. Usar `Nueva granja` para registrar una granja solar, asociar paneles y guardar la generacion inicial.
+3. Usar `Editar` en la tabla de granjas para actualizar ubicacion, familias beneficiadas o estado operativo.
+4. Usar `Desactivar` para marcar una granja como inactiva sin eliminar su historial.
+5. Usar `Nueva generacion` para registrar datos mensuales de generacion real y esperada.
+6. Usar `Editar` o `Eliminar` en el historial de generacion para corregir registros historicos.
+7. Consultar `/api/docs` para ver la documentacion minima de endpoints disponibles.
 
 ## Diagrama de base de datos
 

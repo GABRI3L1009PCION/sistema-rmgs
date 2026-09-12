@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 
 class SolarMetricsService
 {
-    public const CO2_KG_PER_KWH = 0.70;
+    public const CO2_KG_PER_KWH = 0.40;
     public const ALERT_THRESHOLD_PERCENT = 20.0;
     public const DEFAULT_PROJECTION_PERIODS = 3;
 

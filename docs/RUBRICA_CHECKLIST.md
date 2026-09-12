@@ -40,8 +40,8 @@
 - [x] API REST.
 - [x] Reglas de negocio centralizadas en servicio.
 - [x] Pruebas unitarias de calculos solares.
-- [ ] CRUD completo para editar/desactivar granjas.
-- [ ] CRUD completo para registros historicos.
+- [x] CRUD completo para editar/desactivar granjas.
+- [x] CRUD completo para registros historicos.
 
 ## Documentacion
 
@@ -52,7 +52,8 @@
 - [x] Flujo Git y normas de commits documentadas.
 - [x] CHANGELOG.
 - [x] Regla documentada para crear un `.md` por cada cambio solicitado.
-- [ ] Manual breve de usuario con capturas.
+- [x] Manual breve de usuario.
+- [ ] Capturas del manual de usuario.
 
 ## Control de versiones
 
