@@ -37,3 +37,15 @@ Ejecuta migraciones, seeders, rutas y pruebas. Corrige errores hasta que la apli
 ```text
 Genera un README breve con objetivo, funcionalidades, tecnologias, instalacion, endpoints API, reglas de calculo y diagrama de base de datos en Mermaid.
 ```
+
+## Correccion de requerimientos
+
+```text
+Revisa las bases de la competencia contra el codigo Laravel existente e identifica inconsistencias de reglas de negocio. Corrige el factor de CO2 a 0.40 kg CO2/kWh y actualiza codigo, seeders, API y documentacion.
+```
+
+## CRUD faltante
+
+```text
+Completa los requerimientos pendientes del sistema: editar/desactivar granjas solares y administrar registros historicos de generacion. Mantener validaciones, recalculo de CO2 y generacion automatica de alertas cuando la generacion real sea 20% menor que la esperada.
+```

@@ -35,7 +35,7 @@ class ApiController extends Controller
             ],
             'calculation_rules' => [
                 'installed_capacity_kw' => 'cantidad de paneles * potencia nominal del modelo',
-                'co2_avoided_kg' => 'kWh reales * 0.70 kg CO2/kWh',
+                'co2_avoided_kg' => 'kWh reales * 0.40 kg CO2/kWh',
                 'alert' => 'generacion real al menos 20% debajo de la esperada',
                 'projection' => 'promedio movil simple de los ultimos 3 periodos reales',
             ],

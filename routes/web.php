@@ -3,11 +3,41 @@
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SolarFarmController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+Route::post('/cerrar-sesion', function (Request $request) {
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect()->route('dashboard');
+})->name('logout');
+Route::get('/granjas', [SolarFarmController::class, 'index'])->name('farms.index');
 Route::get('/granjas/nueva', [SolarFarmController::class, 'create'])->name('farms.create');
 Route::post('/granjas', [SolarFarmController::class, 'store'])->name('farms.store');
+Route::get('/granjas/{farm}/editar', [SolarFarmController::class, 'edit'])->name('farms.edit');
+Route::put('/granjas/{farm}', [SolarFarmController::class, 'update'])->name('farms.update');
+Route::patch('/granjas/{farm}/desactivar', [SolarFarmController::class, 'deactivate'])->name('farms.deactivate');
+Route::get('/paneles', [SolarFarmController::class, 'panels'])->name('panels.index');
+Route::get('/paneles/nuevo', [SolarFarmController::class, 'createPanel'])->name('panels.create');
+Route::post('/paneles', [SolarFarmController::class, 'storePanel'])->name('panels.store');
+Route::get('/generacion', [SolarFarmController::class, 'generation'])->name('records.index');
+Route::get('/generacion/nueva', [SolarFarmController::class, 'createRecord'])->name('records.create');
+Route::post('/generacion', [SolarFarmController::class, 'storeRecord'])->name('records.store');
+Route::get('/generacion/{record}/editar', [SolarFarmController::class, 'editRecord'])->name('records.edit');
+Route::put('/generacion/{record}', [SolarFarmController::class, 'updateRecord'])->name('records.update');
+Route::delete('/generacion/{record}', [SolarFarmController::class, 'destroyRecord'])->name('records.destroy');
+Route::get('/reportes', [DashboardController::class, 'reports'])->name('reports.index');
+Route::get('/reportes/excel', [DashboardController::class, 'reportCsv'])->name('reports.csv');
+Route::get('/reportes/pdf', [DashboardController::class, 'reportPrint'])->name('reports.print');
+Route::get('/alertas', [DashboardController::class, 'alerts'])->name('alerts.index');
+Route::patch('/alertas/{alert}', [DashboardController::class, 'updateAlertStatus'])->name('alerts.update');
+Route::get('/proyecciones', [DashboardController::class, 'projections'])->name('projections.index');
+Route::get('/proyecciones/exportar', [DashboardController::class, 'projectionCsv'])->name('projections.csv');
+Route::get('/mapa', [DashboardController::class, 'map'])->name('map.index');
+Route::get('/configuracion', [DashboardController::class, 'settings'])->name('settings.index');
+Route::post('/configuracion', [DashboardController::class, 'updateSettings'])->name('settings.update');
 
 Route::prefix('api')->group(function () {
     Route::get('/docs', [ApiController::class, 'docs']);

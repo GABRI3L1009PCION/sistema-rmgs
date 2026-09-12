@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EnergyRecord extends Model
 {
@@ -23,6 +24,11 @@ class EnergyRecord extends Model
     public function solarFarm(): BelongsTo
     {
         return $this->belongsTo(SolarFarm::class);
+    }
+
+    public function alerts(): HasMany
+    {
+        return $this->hasMany(Alert::class);
     }
 
     public function deviationPercent(): float

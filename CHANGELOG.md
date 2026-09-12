@@ -4,6 +4,21 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 
 ## 2026-09-11
 
+### Cambiado
+
+- Compatibilizacion de dependencias para ejecutar el proyecto con PHP 8.3 mediante `composer update -W`.
+- Correccion del factor de CO2 evitado de `0.70` a `0.40 kg CO2/kWh`, alineado con las bases de la competencia.
+
+### Agregado
+
+- Pantalla para editar granjas solares.
+- Accion para desactivar granjas solares sin borrar su historial.
+- Formulario para crear registros historicos de generacion mensual.
+- Pantalla para editar registros historicos de generacion.
+- Accion para eliminar registros historicos de generacion.
+- Tabla de historial de generacion en el dashboard.
+- Manual breve de usuario dentro del README.
+
 ### Agregado
 
 - Inicializacion del proyecto Laravel para el Sistema RMGS.

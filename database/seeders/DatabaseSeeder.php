@@ -88,8 +88,8 @@ class DatabaseSeeder extends Seeder
                     'period' => now()->subMonths(2 - $month)->startOfMonth(),
                     'actual_kwh' => $actual,
                     'expected_kwh' => $expected,
-                    'co2_avoided_kg' => round($actual * 0.70, 2),
-                    'notes' => 'CO2 calculado con factor 0.70 kg CO2/kWh.',
+                    'co2_avoided_kg' => round($actual * 0.40, 2),
+                    'notes' => 'CO2 calculado con factor 0.40 kg CO2/kWh.',
                 ]);
 
                 $deviation = $record->deviationPercent();
