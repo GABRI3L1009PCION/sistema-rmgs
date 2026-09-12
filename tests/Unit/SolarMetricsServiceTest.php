@@ -22,8 +22,8 @@ class SolarMetricsServiceTest extends TestCase
 
     public function test_it_calculates_co2_avoided_from_actual_generation(): void
     {
-        $this->assertSame(700.0, $this->metrics->co2AvoidedKg(1000));
-        $this->assertSame(86.42, $this->metrics->co2AvoidedKg(123.456));
+        $this->assertSame(400.0, $this->metrics->co2AvoidedKg(1000));
+        $this->assertSame(49.38, $this->metrics->co2AvoidedKg(123.456));
     }
 
     public function test_it_calculates_generation_deviation_percent(): void

@@ -92,7 +92,7 @@ class DatabaseSeeder extends Seeder
                     'actual_kwh' => $actual,
                     'expected_kwh' => $expected,
                     'co2_avoided_kg' => $metrics->co2AvoidedKg($actual),
-                    'notes' => 'CO2 calculado con factor 0.70 kg CO2/kWh.',
+                    'notes' => 'CO2 calculado con factor 0.40 kg CO2/kWh.',
                 ]);
 
                 $deviation = $record->deviationPercent();

@@ -6,6 +6,9 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 
 ### Cambiado
 
+- Integrados en `develop` los cambios que fueron enviados a `main` por error, conservando tambien el trabajo previo de `develop`.
+- Compatibilizacion de dependencias para ejecutar el proyecto con PHP 8.3 mediante `composer update -W`.
+- Correccion del factor de CO2 evitado de `0.70` a `0.40 kg CO2/kWh`, alineado con las bases de la competencia.
 - Actualizada la documentacion general para reflejar el servicio de reglas solares y sus pruebas unitarias.
 - Actualizado el flujo Git para describir normas generales de ramas, commits, push e integracion sin mencionar usuarios especificos.
 - Actualizado el checklist de rubrica con control de versiones y evidencia de trabajo incremental.
@@ -14,6 +17,13 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 
 ### Agregado
 
+- Pantalla para editar granjas solares.
+- Accion para desactivar granjas solares sin borrar su historial.
+- Formulario para crear registros historicos de generacion mensual.
+- Pantalla para editar registros historicos de generacion.
+- Accion para eliminar registros historicos de generacion.
+- Tabla de historial de generacion en el dashboard.
+- Manual breve de usuario dentro del README.
 - Guia para colaboradores en `docs/GUIA_COLABORADOR.md` con pasos para clonar, instalar, correr, probar y trabajar con ramas.
 - Documento `docs/cambios/2026-09-11-guia-colaborador.md` con el detalle del cambio.
 - Pruebas unitarias para las reglas solares criticas.
