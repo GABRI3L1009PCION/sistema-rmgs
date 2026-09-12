@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\SolarMetricsService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -42,19 +43,11 @@ class SolarFarm extends Model
 
     public function installedCapacityKw(): float
     {
-        return (float) $this->farmPanels->sum(
-            fn (FarmPanel $farmPanel) => $farmPanel->quantity * $farmPanel->panelModel->nominal_power_kw
-        );
+        return app(SolarMetricsService::class)->installedCapacityKw($this->farmPanels);
     }
 
     public function projectedGenerationKwh(): float
     {
-        $records = $this->energyRecords->sortByDesc('period')->take(3);
-
-        if ($records->isEmpty()) {
-            return 0;
-        }
-
-        return round((float) $records->avg('actual_kwh'), 2);
+        return app(SolarMetricsService::class)->projectedGenerationKwh($this->energyRecords);
     }
 }

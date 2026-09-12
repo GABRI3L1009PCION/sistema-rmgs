@@ -94,8 +94,51 @@ Cada bloque importante debe dejar:
 - Commit claro.
 - Actualizacion en `CHANGELOG.md`.
 - Prompt o resumen en `PROMPTS.md` si se uso IA.
+- Documento `.md` explicando el cambio solicitado, que hace, para que sirve, archivos tocados y pruebas realizadas.
 - Verificacion ejecutada.
 - Pull Request o merge hacia `develop` cuando el cambio este listo.
+
+## Documentacion por cambio
+
+Cada cambio solicitado debe documentarse en un archivo Markdown dentro de `docs/cambios/`.
+
+El nombre del archivo debe ser descriptivo y usar fecha o tema:
+
+```text
+docs/cambios/2026-09-11-reparto-trabajo.md
+docs/cambios/crud-generacion.md
+docs/cambios/servicios-reglas-solares.md
+```
+
+Cada documento debe incluir:
+
+- objetivo del cambio;
+- razon o necesidad;
+- que hace la solucion;
+- archivos principales modificados;
+- pasos para probar;
+- resultado de pruebas;
+- notas o pendientes.
+
+Plantilla sugerida:
+
+```markdown
+# Nombre del cambio
+
+## Objetivo
+
+## Motivo
+
+## Que se hizo
+
+## Archivos tocados
+
+## Como probar
+
+## Resultado de pruebas
+
+## Pendientes
+```
 
 ## Normas antes de subir cambios
 
@@ -108,3 +151,4 @@ Cada bloque importante debe dejar:
 - No borrar historial remoto sin acuerdo del equipo.
 - Revisar `git status` antes de cada commit y antes de cada push.
 - Mantener mensajes de commit en espanol, claros y en modo descriptivo.
+- Agregar o actualizar el `.md` correspondiente en `docs/cambios/` para cada cambio solicitado.

@@ -6,12 +6,18 @@ Formato basado en cambios incrementales para evidenciar avance durante la compet
 
 ### Cambiado
 
+- Actualizada la documentacion general para reflejar el servicio de reglas solares y sus pruebas unitarias.
 - Actualizado el flujo Git para describir normas generales de ramas, commits, push e integracion sin mencionar usuarios especificos.
 - Actualizado el checklist de rubrica con control de versiones y evidencia de trabajo incremental.
 - Reforzada la regla de integracion: las ramas personales solo se integran a `develop`; `main` se reserva para la version final terminada y probada.
+- Agregada la norma de crear un documento `.md` por cada cambio solicitado, explicando objetivo, alcance, archivos tocados y pruebas.
 
 ### Agregado
 
+- Pruebas unitarias para las reglas solares criticas.
+- Documento `docs/cambios/2026-09-11-pruebas-reglas-solares.md` con el detalle de las pruebas agregadas.
+- Servicio `SolarMetricsService` para centralizar calculos de capacidad instalada, CO2 evitado, desviacion, alertas y proyeccion.
+- Documento `docs/cambios/2026-09-11-servicio-reglas-solares.md` con el detalle del cambio.
 - Documento `docs/ESTADO_Y_REPARTO.md` con avance actual, pendientes y division de trabajo entre los integrantes.
 - Inicializacion del proyecto Laravel para el Sistema RMGS.
 - Modelos, migraciones y relaciones principales: departamentos, granjas solares, paneles, registros de generacion y alertas.

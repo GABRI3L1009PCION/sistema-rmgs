@@ -32,6 +32,8 @@ Este documento resume que partes del reto ya estan implementadas, que falta comp
 - Calculo de CO2 evitado.
 - Deteccion de alertas cuando la generacion real esta 20% o mas debajo de la esperada.
 - Proyeccion simple por promedio movil.
+- Servicio centralizado para reglas solares.
+- Pruebas unitarias de reglas solares.
 - API REST basica:
   - departamentos;
   - granjas;
@@ -39,7 +41,7 @@ Este documento resume que partes del reto ya estan implementadas, que falta comp
   - estadisticas;
   - documentacion minima.
 - Formulario rapido para crear una granja con registro inicial.
-- Pruebas base ejecutandose correctamente.
+- Pruebas base y pruebas de reglas solares ejecutandose correctamente.
 
 ### Implementado de forma parcial
 
@@ -62,7 +64,6 @@ Este documento resume que partes del reto ya estan implementadas, que falta comp
 - CRUD de registros historicos de generacion.
 - Vista de detalle por granja.
 - Desactivacion de granjas.
-- Tests de reglas de negocio.
 - Manual de usuario.
 - Capturas de evidencia de uso de IA.
 - Presentacion final.
@@ -73,7 +74,7 @@ Este documento resume que partes del reto ya estan implementadas, que falta comp
 1. Completar CRUD historico de generacion.
 2. Completar CRUD de granjas solares.
 3. Agregar vista de detalle por granja.
-4. Mejorar reglas de negocio y pruebas.
+4. Mejorar reglas de negocio y pruebas adicionales de integracion.
 5. Preparar deploy.
 6. Completar documentacion de usuario y evidencias.
 7. Preparar presentacion final.
@@ -110,8 +111,8 @@ Tareas concretas:
 Commits esperados:
 
 ```text
-Agregar servicios para reglas solares
-Agregar pruebas de calculos solares
+Agregar servicios para reglas solares [hecho]
+Agregar pruebas de calculos solares [hecho]
 Documentar reglas de negocio
 Preparar configuracion para despliegue
 ```

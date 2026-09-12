@@ -61,6 +61,24 @@ http://127.0.0.1:8000
 - CO2 evitado: `generacion_real_kwh * 0.70`.
 - Alerta: se activa si la generacion real esta al menos 20% debajo de la esperada.
 - Proyeccion: promedio movil simple de los ultimos 3 registros reales de la granja.
+- Implementacion centralizada en `app/Services/SolarMetricsService.php`.
+
+## Pruebas
+
+Ejecutar:
+
+```bash
+php artisan test
+```
+
+Cobertura actual:
+
+- prueba de carga de la aplicacion;
+- calculo de CO2 evitado;
+- calculo de desviacion entre generacion real y esperada;
+- activacion de alerta al 20%;
+- proyeccion por promedio movil;
+- capacidad instalada por cantidad y potencia de paneles.
 
 ## Diagrama de base de datos
 
