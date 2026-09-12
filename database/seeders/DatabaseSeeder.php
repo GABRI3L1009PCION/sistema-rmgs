@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\EnergyRecord;
 use App\Models\PanelModel;
 use App\Models\SolarFarm;
+use App\Services\SolarMetricsService;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -63,6 +64,8 @@ class DatabaseSeeder extends Seeder
             ['Lago Solar Atitlan', 'Solola', 'Panajachel', 14.7400, -91.1590, 310, 240, 2, [45100, 47200, 48600]],
         ];
 
+        $metrics = app(SolarMetricsService::class);
+
         foreach ($farms as [$name, $departmentName, $municipality, $lat, $lng, $families, $quantity, $panelIndex, $actuals]) {
             $farm = SolarFarm::create([
                 'department_id' => Department::where('name', $departmentName)->value('id'),
@@ -88,12 +91,12 @@ class DatabaseSeeder extends Seeder
                     'period' => now()->subMonths(2 - $month)->startOfMonth(),
                     'actual_kwh' => $actual,
                     'expected_kwh' => $expected,
-                    'co2_avoided_kg' => round($actual * 0.70, 2),
+                    'co2_avoided_kg' => $metrics->co2AvoidedKg($actual),
                     'notes' => 'CO2 calculado con factor 0.70 kg CO2/kWh.',
                 ]);
 
                 $deviation = $record->deviationPercent();
-                if ($deviation >= 20) {
+                if ($metrics->shouldTriggerAlert($record->actual_kwh, $record->expected_kwh)) {
                     Alert::create([
                         'solar_farm_id' => $farm->id,
                         'energy_record_id' => $record->id,

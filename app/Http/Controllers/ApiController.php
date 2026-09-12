@@ -38,6 +38,7 @@ class ApiController extends Controller
                 'co2_avoided_kg' => 'kWh reales * 0.70 kg CO2/kWh',
                 'alert' => 'generacion real al menos 20% debajo de la esperada',
                 'projection' => 'promedio movil simple de los ultimos 3 periodos reales',
+                'source' => 'app/Services/SolarMetricsService.php',
             ],
         ]);
     }

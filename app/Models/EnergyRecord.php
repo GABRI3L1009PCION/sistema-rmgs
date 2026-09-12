@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\SolarMetricsService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -27,10 +28,6 @@ class EnergyRecord extends Model
 
     public function deviationPercent(): float
     {
-        if ((float) $this->expected_kwh <= 0) {
-            return 0;
-        }
-
-        return round((1 - ($this->actual_kwh / $this->expected_kwh)) * 100, 2);
+        return app(SolarMetricsService::class)->deviationPercent($this->actual_kwh, $this->expected_kwh);
     }
 }

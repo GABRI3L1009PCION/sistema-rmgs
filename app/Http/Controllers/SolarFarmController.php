@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Department;
 use App\Models\PanelModel;
 use App\Models\SolarFarm;
+use App\Services\SolarMetricsService;
 use Illuminate\Http\Request;
 
 class SolarFarmController extends Controller
@@ -17,7 +18,7 @@ class SolarFarmController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, SolarMetricsService $metrics)
     {
         $validated = $request->validate([
             'department_id' => ['required', 'exists:departments,id'],
@@ -53,12 +54,12 @@ class SolarFarmController extends Controller
             'period' => now()->startOfMonth(),
             'actual_kwh' => $validated['actual_kwh'],
             'expected_kwh' => $validated['expected_kwh'],
-            'co2_avoided_kg' => round($validated['actual_kwh'] * 0.70, 2),
+            'co2_avoided_kg' => $metrics->co2AvoidedKg($validated['actual_kwh']),
             'notes' => 'Registro inicial desde formulario rapido.',
         ]);
 
         $deviation = $record->deviationPercent();
-        if ($deviation >= 20) {
+        if ($metrics->shouldTriggerAlert($record->actual_kwh, $record->expected_kwh)) {
             $farm->alerts()->create([
                 'energy_record_id' => $record->id,
                 'period' => $record->period,
